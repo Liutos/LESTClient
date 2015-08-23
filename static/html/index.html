@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="/static/js/ejs_0.9_alpha_1_production.js"></script>
+    <style>
+        #footer {
+            padding-left: 20px;
+        }
+        #navigation-bar {
+        }
+        #request-body {
+        }
+        #request-container {
+        }
+        #request-form {
+            box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.3);
+        }
+        #request-headers {
+            width: 100%;
+        }
+        #request-info {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        #request-method {
+        }
+        #request-send {
+            margin-left: 10px;
+        }
+        #request-title {
+        }
+        #request-url {
+            margin-left: 10px;
+        }
+        #response-info {
+            display: none;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        #response-tabs {
+            margin-bottom: 18px;
+        }
+        .upload-field {
+            border: 0;
+            border-bottom: solid thin;
+            border-radius: 0;
+            box-shadow: none;
+            width: 320px;
+        }
+        .request-headers-field {
+            display: block;
+        }
+        .request-headers-field-add {
+            display: inline-block;
+            margin-left: 10px;
+            position: relative;
+            top: -10px;
+        }
+        .request-headers-field-delete {
+            display: inline-block;
+            margin-left: 10px;
+            position: relative;
+            top: -10px;
+        }
+        .request-headers-field-key {
+            display: inline-block;
+        }
+        .request-headers-field-value {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .request-param > div {
+            display: inline-block;
+        }
+        .request-param-value {
+            margin-left: 10px;
+        }
+        .request-param-add {
+            margin-left: 10px;
+            position: relative;
+            top: -10px;
+        }
+        .request-param-delete {
+            margin-left: 10px;
+            position: relative;
+            top: -10px;
+        }
+    </style>
+    <title>LESTClient</title>
+</head>
+<body>
+<div id="navigation-bar">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand">LESTClient</a>
+            </div>
+        </div>
+    </nav>
+</div>
+<div id="request-info">
+    <div id="request-title">
+        <h3>Request</h3>
+    </div>
+    <div id="request-container">
+        <div id="request-header">
+            <form class="form-inline well well-sm" id="request-form">
+                <div class="form-group" id="request-method">
+                    <label for="input-method">请求方法</label>
+                    <input class="form-control" id="input-method">
+                </div>
+                <div class="form-group" id="request-url">
+                    <label for="input-url">请求地址</label>
+                    <input class="form-control" id="input-url" style="width: 640px">
+                </div>
+                <a class="btn btn-primary" id="request-send">发送请求</a>
+            </form>
+            <div id="request-headers">
+            </div>
+            <div id="request-params">
+            </div>
+        </div>
+        <div id="request-body">
+        </div>
+    </div>
+</div>
+<hr>
+<div id="response-info">
+    <div id="response-title">
+        <h3>Response</h3>
+    </div>
+    <div id=response-body>
+        <ul class="nav nav-tabs" id="response-tabs">
+            <li role="presentation" class="active">
+                <a aria-controls="response-headers" data-toggle="tab" href="#response-headers" role="tab">
+                    Response Headers
+                </a>
+            </li>
+            <li role="presentation">
+                <a aria-controls="response-body-raw" data-toggle="tab" href="#response-body-raw" role="tab">
+                    Response Body (Raw)
+                </a>
+            </li>
+            <li role="presentation">
+                <a aria-controls="response-body-highlight" data-toggle="tab" href="#response-body-highlight" role="tab">
+                    Response Body (Highlight)
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="response-container">
+            <div class="tab-pane active" id="response-headers" role="tabpanel">
+            </div>
+            <div class="tab-pane" id="response-body-raw">
+                <pre class="pre-scrollable" id="response-body-raw-content" role="tabpanel">
+                </pre>
+            </div>
+            <div class="tab-pane" id="response-body-highlight" role="tabpanel">
+                <pre id="response-body-highlight-content">
+                </pre>
+            </div>
+        </div>
+    </div>
+</div>
+<footer id="footer">
+    <p>
+        <a href="https://github.com/Liutos/LESTClient">GitHub</a>
+    </p>
+</footer>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
