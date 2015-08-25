@@ -111,11 +111,24 @@
             <form class="form-inline well well-sm" id="request-form">
                 <div class="form-group" id="request-method">
                     <label for="input-method">请求方法</label>
-                    <input class="form-control" id="input-method">
+                    <div class="input-group">
+                        <input class="form-control" id="input-method" placeholder="GET" type="text">
+                        <span class="input-group-btn">
+                            <span aria-haspopup="true" aria-expanded="false" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="glyphicon glyphicon-chevron-down"></span>
+                            </span>
+                            <ul class="dropdown-menu">
+                                <li><a class="ev-method">GET</a></li>
+                                <li><a class="ev-method">POST</a></li>
+                                <li><a class="ev-method">PUT</a></li>
+                                <li><a class="ev-method">DELETE</a></li>
+                            </ul>
+                        </span>
+                    </div>
                 </div>
                 <div class="form-group" id="request-url">
                     <label for="input-url">请求地址</label>
-                    <input class="form-control" id="input-url" style="width: 640px">
+                    <input class="form-control" id="input-url" placeholder="http://www.example.com" style="width: 640px">
                 </div>
                 <a class="btn btn-primary" id="request-send">发送请求</a>
             </form>

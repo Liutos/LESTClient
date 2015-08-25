@@ -97,11 +97,13 @@
 (defun handle-api-request/impl (headers method params url)
   (declare (ignorable headers method params))
   (let ((ap (headers->alist headers))
+        (method (intern (string-upcase method) :keyword))
         (ps (params->alist params)))
     (multiple-value-bind (body code headers)
         (lest-http-request
          url
          :additional-headers ap
+         :method method
          :parameters ps)
       (declare (ignorable body code))
       (handle-json-response *code-ok* headers body))))

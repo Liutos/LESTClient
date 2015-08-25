@@ -126,3 +126,8 @@ $('#request-send').on('click', function () {
     var html = new EJS({ url: '/static/tmpl/request-param-tmpl.html' }).render({});
     $('#request-params').html(html);
 })();
+
+$('.ev-method').on('click', function (event) {
+    var a = $(event.currentTarget);
+    $('#input-method').val(a.text());
+});
