@@ -1,21 +1,21 @@
-<div class="request-param">
+<div class="kv-row request-param">
     <div class="request-param-key">
         <input class="form-control input-param-key upload-field" placeholder="URL Parameter Key" type="text">
     </div>
     <div class="dropdown request-param-type" style="margin-left: 10px; top: -10px">
         <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Raw
+            <span class="type-selected">Raw</span>
             <span class="caret"></span>
         </button>
         <ul class="dropdown-menu select-type">
             <li><a href="#">JSON</a></li>
-            <li><a href="#">Integer</a></li>
-            <li><a href="#">Raw</a></li>
+            <li><a class="type-integer" href="#">Integer</a></li>
+            <li><a class="type-raw" href="#">Raw</a></li>
             <li><a href="#">Sign</a></li>
             <li><a href="#">Timestamp</a></li>
         </ul>
     </div>
-    <div class="request-param-value">
+    <div class="request-param-value input-instance">
         <input class="form-control input-param-value upload-field" placeholder="Value" type="text">
     </div>
     <div class="request-param-add">

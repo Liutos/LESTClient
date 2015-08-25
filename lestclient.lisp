@@ -62,6 +62,24 @@
       (destructuring-bind (key . val) pair
         (cons (symbol-name key) (lambda () val))))))
 
+(defun type-integer-pp (val)
+  (let ((res (register-groups-bind (s e)
+		 ("([0-9]+) *~ *([0-9]+)" val)
+	       (let ((s (parse-integer s))
+		     (e (parse-integer e)))
+		 (+ (random (- e s)) s)))))
+    (if res
+	(format nil "~D" res)
+	val)))
+
+(defun param-value-pp (param-value)
+  (destructuring-bind (type val) param-value
+    (declare (ignorable type))
+    (let ((type (intern (string-upcase type))))
+      (cond ((eq type 'integer)
+	     (type-integer-pp val))
+	    (t val)))))
+
 (defun params->alist (params)
   (unless params
     (setf params "{}"))
@@ -69,7 +87,8 @@
          (ht (decode-json-from-string params)))
     (mapeach ht pair
       (destructuring-bind (key . val) pair
-        (cons (symbol-name key) val)))))
+        (cons (symbol-name key)
+	      (param-value-pp val))))))
 
 (defun headers-capitalize (headers)
   (mapeach headers cons

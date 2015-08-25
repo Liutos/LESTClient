@@ -59,11 +59,12 @@ function collect_params() {
     var params = {};
     $('.request-param').each(function (_, param) {
         var key = $(param).find('.input-param-key');
+        var type = $(param).find('.type-selected').text();
         var val = $(param).find('.input-param-value');
         if (key.val() === "") {
             return;
         }
-        params[key.val()] = val.val();
+        params[key.val()] = [type, val.val()];
     });
     return JSON.stringify(params);
 }
