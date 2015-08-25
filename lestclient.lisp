@@ -71,11 +71,17 @@
       (destructuring-bind (key . val) pair
         (cons (symbol-name key) val)))))
 
+(defun headers-capitalize (headers)
+  (mapeach headers cons
+    (destructuring-bind (key . val) cons
+      (cons (string-capitalize (symbol-name key))
+	    val))))
+
 (defun handle-response (code headers content)
   (let ((resp
          `((code . ,code)
            (data . ((body . ,content)
-                    (headers . ,headers))))))
+                    (headers . ,(headers-capitalize headers)))))))
     (encode-json-to-string resp)))
 
 (defun handle-json-response (code headers content)

@@ -2,7 +2,7 @@
 
 (defpackage #:lestclient
   (:use #:cl
-        #:cl-json
+        #:json
         #:cl-ppcre
         #:hunchentoot)
   (:import-from #:drakma #:http-request))
