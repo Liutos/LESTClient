@@ -4,24 +4,17 @@
 
 $(document).on('click', '.request-headers-field-add', function (event) {
     var btn = event.currentTarget;
-    console.log(btn);
     var row = $(btn.closest('.request-headers-field'));
-    console.log(row);
     var html = new EJS({ url: '/static/tmpl/request-headers-field-tmpl.html' }).render({});
-    console.log(html);
-    row.next().after(html);
+    row.after(html);
 });
 
 $(document).on('click', '.request-headers-field-delete', function (event) {
     var btn = event.currentTarget;
     var row = $(btn.closest('.request-headers-field'));
-    console.log(row);
-    var next = row.next().next();
-    console.log(next.length);
+    var next = row.next();
     var prev = row.prev();
-    console.log(prev.length);
     if (next.length > 0 || prev.length > 0) {
-        row.next().remove();
         row.remove();
     } else {
         var input = row.find('input');
@@ -32,22 +25,16 @@ $(document).on('click', '.request-headers-field-delete', function (event) {
 $(document).on('click', '.request-param-add', function (event) {
     var btn = event.currentTarget;
     var row = $(btn.closest('.request-param'));
-    console.log(row);
     var html = new EJS({ url: '/static/tmpl/request-param-tmpl.html' }).render({});
-    console.log(html);
-    row.next().after(html);
+    row.after(html);
 });
 
 $(document).on('click', '.request-param-delete', function (event) {
     var btn = event.currentTarget;
     var row = $(btn.closest('.request-param'));
-    console.log(row);
-    var next = row.next().next();
-    console.log(next.length);
+    var next = row.next();
     var prev = row.prev();
-    console.log(prev.length);
     if (next.length > 0 || prev.length > 0) {
-        row.next().remove();
         row.remove();
     } else {
         var input = row.find('input');
@@ -60,8 +47,6 @@ function collect_headers() {
     $('.request-headers-field').each(function (_, header) {
         var key = $(header).find('.input-header-key');
         var val = $(header).find('.input-header-value');
-        console.log(key);
-        console.log(val);
         if (key.val() === "") {
             return;
         }
@@ -75,8 +60,6 @@ function collect_params() {
     $('.request-param').each(function (_, param) {
         var key = $(param).find('.input-param-key');
         var val = $(param).find('.input-param-value');
-        console.log(key);
-        console.log(val);
         if (key.val() === "") {
             return;
         }
@@ -108,7 +91,6 @@ $('#request-send').on('click', function () {
         },
         success: function (data) {
             $('#response-info').show();
-            console.log(data);
             var headers = data['DATA']['HEADERS'];
             fill_resp_headers(headers);
             var body = data['DATA']['BODY'];
