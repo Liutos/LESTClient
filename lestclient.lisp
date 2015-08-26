@@ -110,6 +110,22 @@
                (format-ts ts fmt)))))
         (t val)))
 
+(defun md5hex (str)
+  (declare (type string str))
+  (with-input-from-string (s str)
+    (let ((seq (md5:md5sum-stream s)))
+      (with-output-to-string (s)
+        (dotimes (i (length seq))
+          (format s "~2,'0X" (elt seq i)))))))
+
+(defun type-sign-pp (val &aux (pat "(.*) +of +(.*)"))
+  (let ((res (register-groups-bind (op src)
+                 (pat val)
+               (cond ((string-equal op "md5")
+                      (md5hex src))
+                     (t src)))))
+    (if res res val)))
+
 (defun param-value-pp (param-value)
   (destructuring-bind (type val) param-value
     (declare (ignorable type))
@@ -118,6 +134,8 @@
              (type-integer-pp val))
             ((eq type :timestamp)
              (type-timestamp-pp val))
+            ((eq type :sign)
+             (type-sign-pp val))
             (t val)))))
 
 (defun params->alist (params)
