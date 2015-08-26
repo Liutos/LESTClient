@@ -118,15 +118,25 @@
         (dotimes (i (length seq))
           (format s "~2,'0X" (elt seq i)))))))
 
-(defun type-sign-pp (val &aux (pat "(.*) +of +(.*)"))
+(defun get-from-result (var result)
+  (let* ((name (subseq var (1+ (position #\$ var))))
+         (pair (assoc name result :test #'equal)))
+    (if pair (cdr pair) var)))
+
+(defun type-sign-pp (val result &aux (pat "(.*) +of +(.*)"))
+  (declare (ignorable result))
   (let ((res (register-groups-bind (op src)
                  (pat val)
+               (when (position #\$ src)
+                 (let ((v (get-from-result src result)))
+                   (setf src v)))
                (cond ((string-equal op "md5")
                       (md5hex src))
                      (t src)))))
     (if res res val)))
 
-(defun param-value-pp (param-value)
+(defun param-value-pp (param-value result)
+  (declare (ignorable result))
   (destructuring-bind (type val) param-value
     (declare (ignorable type))
     (let ((type (intern (string-upcase type) :keyword)))
@@ -135,7 +145,7 @@
             ((eq type :timestamp)
              (type-timestamp-pp val))
             ((eq type :sign)
-             (type-sign-pp val))
+             (type-sign-pp val result))
             (t val)))))
 
 (defun params->alist (params)
@@ -143,10 +153,15 @@
     (setf params "{}"))
   (let* ((*json-identifier-name-to-lisp* 'identity)
          (ht (decode-json-from-string params)))
-    (mapeach ht pair
-      (destructuring-bind (key . val) pair
-        (cons (symbol-name key)
-              (param-value-pp val))))))
+    (labels ((aux (ht res)
+               (when (null ht)
+                 (return-from aux res))
+               (destructuring-bind (key . val) (car ht)
+                 (push (cons (symbol-name key)
+                             (param-value-pp val res))
+                       res)
+                 (aux (cdr ht) res))))
+      (aux ht '()))))
 
 (defun headers-capitalize (headers)
   (mapeach headers cons
