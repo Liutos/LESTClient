@@ -8,7 +8,8 @@
   :depends-on (#:cl-json
                #:cl-ppcre
                #:drakma
-               #:hunchentoot)
+               #:hunchentoot
+               #:local-time)
   :components ((:file "package")
                (:file "lestclient")))
 

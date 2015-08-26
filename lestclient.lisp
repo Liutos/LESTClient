@@ -64,21 +64,29 @@
 
 (defun type-integer-pp (val)
   (let ((res (register-groups-bind (s e)
-		 ("([0-9]+) *~ *([0-9]+)" val)
-	       (let ((s (parse-integer s))
-		     (e (parse-integer e)))
-		 (+ (random (- e s)) s)))))
+                 ("([0-9]+) *~ *([0-9]+)" val)
+               (let ((s (parse-integer s))
+                     (e (parse-integer e)))
+                 (+ (random (- e s)) s)))))
     (if res
-	(format nil "~D" res)
-	val)))
+        (format nil "~D" res)
+        val)))
+
+(defun type-timestamp-pp (val)
+  (cond ((string-equal val "now")
+         (format nil "~D"
+                 (timestamp-to-unix (now))))
+        (t val)))
 
 (defun param-value-pp (param-value)
   (destructuring-bind (type val) param-value
     (declare (ignorable type))
-    (let ((type (intern (string-upcase type))))
-      (cond ((eq type 'integer)
-	     (type-integer-pp val))
-	    (t val)))))
+    (let ((type (intern (string-upcase type) :keyword)))
+      (cond ((eq type :integer)
+             (type-integer-pp val))
+            ((eq type :timestamp)
+             (type-timestamp-pp val))
+            (t val)))))
 
 (defun params->alist (params)
   (unless params
@@ -88,13 +96,13 @@
     (mapeach ht pair
       (destructuring-bind (key . val) pair
         (cons (symbol-name key)
-	      (param-value-pp val))))))
+              (param-value-pp val))))))
 
 (defun headers-capitalize (headers)
   (mapeach headers cons
     (destructuring-bind (key . val) cons
       (cons (string-capitalize (symbol-name key))
-	    val))))
+            val))))
 
 (defun handle-response (code headers content)
   (let ((resp
