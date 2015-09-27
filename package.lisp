@@ -2,6 +2,7 @@
 
 (defpackage #:lestclient
   (:use #:cl
+        #:cl-annot
         #:json
         #:cl-ppcre
         #:hunchentoot)

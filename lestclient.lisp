@@ -4,6 +4,8 @@
 
 ;;; "lestclient" goes here. Hacks and glory await!
 
+(enable-annot-syntax)
+
 (defvar *project-dir*
   (asdf:system-source-directory '#:lestclient))
 
@@ -17,9 +19,11 @@
 
 (defvar *code-ok* 1000)
 
+@export
 (defun lest-start ()
   (start *acceptor*))
 
+@export
 (defun lest-stop ()
   (stop *acceptor*))
 
