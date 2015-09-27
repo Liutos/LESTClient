@@ -207,10 +207,16 @@
                     body)))
       (values body code headers))))
 
+(defun method-pp (method)
+  (let ((m (if (string= method "")
+               "GET"
+               method)))
+    (intern (string-upcase m) :keyword)))
+
 (defun handle-api-request/impl (headers method params url)
   (declare (ignorable headers method params))
   (let ((ap (headers->alist headers))
-        (method (intern (string-upcase method) :keyword))
+        (method (method-pp method))
         (ps (params->alist params)))
     (multiple-value-bind (body code headers)
         (lest-http-request
