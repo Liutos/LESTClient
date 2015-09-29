@@ -9,8 +9,11 @@
 (defvar *project-dir*
   (asdf:system-source-directory '#:lestclient))
 
+(defvar *static*
+  (merge-pathnames "static/" *project-dir*))
+
 (defvar *www*
-  (merge-pathnames "static/html/" *project-dir*))
+  (merge-pathnames "html/" *static*))
 
 (defvar *acceptor*
   (make-instance 'easy-acceptor
@@ -27,27 +30,8 @@
 (defun lest-stop ()
   (stop *acceptor*))
 
-(define-easy-handler (say-yo :uri "/yo")
-    (name)
-  (setf (content-type*) "text/plain")
-  (format nil "Hey~@[ ~A~]!" name))
-
-(defun handle-static-uri (req)
-  (let ((uri (request-uri req)))
-    (scan "/static" uri)))
-
-(defun extend-static-uri (uri)
-  (merge-pathnames (subseq uri 1) *project-dir*))
-
-(define-easy-handler (handle-static :uri #'handle-static-uri)
-    ()
-  (let ((path (extend-static-uri (request-uri*))))
-    (unless (probe-file path)
-      (setf path (merge-pathnames "404.html" *www*)))
-    (with-open-file (s path)
-      (let ((data (make-string (file-length s))))
-        (read-sequence data s)
-        data))))
+(push (create-folder-dispatcher-and-handler "/static/" *static*)
+      *dispatch-table*)
 
 (defparameter *builtin-headers*
   '(user-agent))
