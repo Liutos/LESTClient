@@ -164,40 +164,26 @@
   (let ((*lisp-identifier-name-to-json* 'identity))
     (handle-response code headers content)))
 
-(defun lest-http-request (url &rest args)
-  (multiple-value-bind (body code headers)
-      (apply #'drakma:http-request url args)
-    (declare (ignorable code))
-    (let ((body (if (typep body '(simple-array (unsigned-byte 8)))
-                    (flexi-streams:octets-to-string
-                     body
-                     :external-format :utf-8)
-                    body)))
-      (values body code headers))))
-
 (defun method-pp (method)
   (let ((m (if (string= method "")
                "GET"
                method)))
     (intern (string-upcase m) :keyword)))
 
-(defun handle-api-request/impl (headers method params url)
+(define-easy-handler (handle-api-request :uri "/api/request")
+    (method url headers params)
   (declare (ignorable headers method params))
   (let ((ap (headers->alist headers))
         (method (method-pp method))
         (ps (params->alist params)))
     (multiple-value-bind (body code headers)
-        (lest-http-request
+        (http-request
          url
          :additional-headers ap
          :method method
          :parameters ps)
       (declare (ignorable body code))
       (handle-json-response *code-ok* headers body))))
-
-(define-easy-handler (handle-api-request :uri "/api/request")
-    (method url headers params)
-  (handle-api-request/impl headers method params url))
 
 ;;; Public
 

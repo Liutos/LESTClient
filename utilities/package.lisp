@@ -3,7 +3,8 @@
 (defpackage #:com.liutos.fw
   (:use #:cl
         #:hunchentoot)
-  (:shadow #:start
+  (:shadow #:define-easy-handler
+           #:start
            #:stop)
   (:export #:*application*
            #:init

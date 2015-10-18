@@ -27,7 +27,36 @@
   (declare (ignore initargs))
   (setf-default (application-port instance) +PORT+))
 
+;;; Private functions
+(defun handler-name (name)
+  (intern (format nil "HANDLER/~A" name)))
+
+(defun parse-description (description)
+  (etypecase description
+    (cons (destructuring-bind (name . args) description
+            (values name
+                    (cons (handler-name name)
+                          args))))
+    (symbol (values description
+                    (handler-name description)))))
+
+(defun parse-lambda-list (lambda-list)
+  (mapcar #'(lambda (ele)
+              (etypecase ele
+                (cons (first ele))
+                (symbol ele)))
+          lambda-list))
+
 ;;; Public functions
+(defmacro define-easy-handler (description lambda-list &body body)
+  (multiple-value-bind (name description)
+      (parse-description description)
+    (let ((args (parse-lambda-list lambda-list)))
+      `(progn
+         (defun ,name ,args ,@body)
+         (hunchentoot:define-easy-handler ,description ,lambda-list
+           (,name ,@args))))))
+
 (defun init (&key
                document-root
                port

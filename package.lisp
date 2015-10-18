@@ -8,11 +8,12 @@
         #:hunchentoot
 
         #:com.liutos.fw)
-  (:import-from #:drakma #:http-request)
   (:import-from #:local-time
                 #:now
                 #:timestamp-to-unix)
+  (:shadow #:http-request)
   (:shadowing-import-from #:com.liutos.fw
+                          #:define-easy-handler
                           #:start
                           #:stop)
   (:export #:lest-start

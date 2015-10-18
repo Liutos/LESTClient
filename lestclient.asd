@@ -15,5 +15,6 @@
                         :components ((:file "package")
                                      (:file "fw")))
                (:file "package")
+               (:file "http_client")
                (:file "lestclient")))
 
