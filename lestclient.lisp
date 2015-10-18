@@ -157,10 +157,9 @@
          `((code . ,code)
            (data . ((body . ,content)
                     (headers . ,(headers-capitalize headers)))))))
-    (encode-json-to-string resp)))
+    (render :json resp)))
 
 (defun handle-json-response (code headers content)
-  (setf (content-type*) "application/json")
   (let ((*lisp-identifier-name-to-json* 'identity))
     (handle-response code headers content)))
 
