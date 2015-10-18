@@ -15,23 +15,7 @@
 (defvar *www*
   (merge-pathnames "html/" *static*))
 
-(defvar *acceptor*
-  (make-instance 'easy-acceptor
-                 :document-root *www*
-                 :port 4242))
-
 (defvar *code-ok* 1000)
-
-@export
-(defun lest-start ()
-  (start *acceptor*))
-
-@export
-(defun lest-stop ()
-  (stop *acceptor*))
-
-(push (create-folder-dispatcher-and-handler "/static/" *static*)
-      *dispatch-table*)
 
 (defparameter *builtin-headers*
   '(user-agent))
@@ -214,3 +198,19 @@
 (define-easy-handler (handle-api-request :uri "/api/request")
     (method url headers params)
   (handle-api-request/impl headers method params url))
+
+;;; Public
+
+@export
+(defun lest-start ()
+  (setf *application*
+        (init
+         :document-root *www*
+         :port 4242
+         :static-path "/static/"
+         :static-root *static*))
+  (start))
+
+@export
+(defun lest-stop ()
+  (stop))

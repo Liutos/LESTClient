@@ -5,9 +5,16 @@
         #:cl-annot
         #:json
         #:cl-ppcre
-        #:hunchentoot)
+        #:hunchentoot
+
+        #:com.liutos.fw)
   (:import-from #:drakma #:http-request)
   (:import-from #:local-time
                 #:now
-                #:timestamp-to-unix))
+                #:timestamp-to-unix)
+  (:shadowing-import-from #:com.liutos.fw
+                          #:start
+                          #:stop)
+  (:export #:lest-start
+           #:lest-stop))
 

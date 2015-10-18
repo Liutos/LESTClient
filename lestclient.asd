@@ -11,6 +11,9 @@
                #:drakma
                #:hunchentoot
                #:local-time)
-  :components ((:file "package")
+  :components ((:module "utilities"
+                        :components ((:file "package")
+                                     (:file "fw")))
+               (:file "package")
                (:file "lestclient")))
 
