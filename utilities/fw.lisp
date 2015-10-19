@@ -64,6 +64,16 @@
                 (symbol ele)))
           lambda-list))
 
+(defun double-valid-p (&rest args)
+  "Return T if there are more than one no-null value in `args'"
+  (let ((cnt 0))
+    (dolist (arg args)
+      (when arg
+        (incf cnt))
+      (when (>= cnt 2)
+        (return-from double-valid-p t)))
+    nil))
+
 ;;; Public functions
 (defmacro define-easy-handler (description lambda-list &body body)
   (multiple-value-bind (name description)
@@ -83,11 +93,11 @@
                  json
                  nothing
                  plain)
-  (when (and file
-             html
-             json
-             nothing
-             plain)
+  (when (double-valid-p file
+                        html
+                        json
+                        nothing
+                        plain)
     (error "Only one valid argument allowed in ~{`~(~A~)'~^, ~}"
            '(file html json nothing plain)))
   (cond (file
