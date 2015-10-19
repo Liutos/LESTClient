@@ -27,6 +27,23 @@
   (declare (ignore initargs))
   (setf-default (application-port instance) +PORT+))
 
+(defclass response ()
+  ((body :initarg :body
+         :reader response-body)
+   (content-type :accessor response-content-type
+                 :initarg :content-type)))
+
+(defmethod initialize-instance :after ((instance response) &rest initargs)
+  (declare (ignore initargs))
+  (setf-default (response-content-type instance) "text/html"))
+
+(defun make-response (body
+                      &optional
+                        content-type)
+  (make-instance 'response
+                 :body body
+                 :content-type content-type))
+
 ;;; Private functions
 (defun handler-name (name)
   (intern (format nil "HANDLER/~A" name)))
@@ -51,11 +68,14 @@
 (defmacro define-easy-handler (description lambda-list &body body)
   (multiple-value-bind (name description)
       (parse-description description)
-    (let ((args (parse-lambda-list lambda-list)))
+    (let ((args (parse-lambda-list lambda-list))
+          (response (gensym)))
       `(progn
          (defun ,name ,args ,@body)
          (hunchentoot:define-easy-handler ,description ,lambda-list
-           (,name ,@args))))))
+           (let ((,response (,name ,@args)))
+             (setf (content-type*) (response-content-type ,response))
+             (response-body ,response)))))))
 
 (defun render (&key
                  file
@@ -70,22 +90,16 @@
              plain)
     (error "Only one valid argument allowed in ~{`~(~A~)'~^, ~}"
            '(file html json nothing plain)))
-  (let (content-type body)
-    (cond (file
-           (setf body (handle-static-file file)))
-          (html
-           (setf content-type "text/html"
-                 body html))
-          (json
-           (setf content-type "application/json"
-                 body (encode-json-to-string json)))
-          (nothing
-           (setf body ""))
-          (plain
-           (setf content-type "text/plain"
-                 body plain)))
-    (setf (content-type*) content-type)
-    (return-from render body)))
+  (cond (file
+         (make-response (handle-static-file file)))
+        (html
+         (make-response html "text/html"))
+        (json
+         (make-response (encode-json-to-string json) "application/json"))
+        (nothing
+         (make-response ""))
+        (plain
+         (make-response plain "text/plain"))))
 
 (defun init (&key
                document-root
