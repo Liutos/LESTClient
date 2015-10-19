@@ -80,7 +80,7 @@ $('#request-send').on('click', function () {
     var method = $('#input-method').val();
     var url = $('#input-url').val();
     var api = '/api/request';
-    $.ajax(api, {
+    $.ajax({
         data: {
             headers: headers,
             method: method,
@@ -90,13 +90,15 @@ $('#request-send').on('click', function () {
         error: function () {
             alert('Error occurred at '.concat(api));
         },
+        method: 'POST',
         success: function (data) {
             $('#response-info').show();
             var headers = data['DATA']['HEADERS'];
             fill_resp_headers(headers);
             var body = data['DATA']['BODY'];
             $('#response-body-raw-content').text(body);
-        }
+        },
+        url: api
     });
 });
 

@@ -48,12 +48,20 @@
 (defun handler-name (name)
   (intern (format nil "HANDLER/~A" name)))
 
+(defun parse-verb (args)
+  (getf args :verb))
+
 (defun parse-description (description)
   (etypecase description
     (cons (destructuring-bind (name . args) description
-            (values name
-                    (cons (handler-name name)
-                          args))))
+            (let* ((verb (parse-verb args))
+                   (args (if verb
+                             (append args '(:allow-other-keys t))
+                             args)))
+              (values name
+                      (cons (handler-name name)
+                            args)
+                      (parse-verb args)))))
     (symbol (values description
                     (handler-name description)))))
 
@@ -76,16 +84,21 @@
 
 ;;; Public functions
 (defmacro define-easy-handler (description lambda-list &body body)
-  (multiple-value-bind (name description)
+  (multiple-value-bind (name description verb)
       (parse-description description)
     (let ((args (parse-lambda-list lambda-list))
           (response (gensym)))
       `(progn
          (defun ,name ,args ,@body)
          (hunchentoot:define-easy-handler ,description ,lambda-list
-           (let ((,response (,name ,@args)))
-             (setf (content-type*) (response-content-type ,response))
-             (response-body ,response)))))))
+           (if (and ,verb (not (eq ,verb (request-method*))))
+               (progn
+                 (setf (return-code*) 404)
+                 (format nil "Action not found For request '~A ~A'"
+                         ,verb (request-uri*)))
+               (let ((,response (,name ,@args)))
+                 (setf (content-type*) (response-content-type ,response))
+                 (response-body ,response))))))))
 
 (defun render (&key
                  file
