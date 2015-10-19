@@ -95,7 +95,9 @@
         (html
          (make-response html "text/html"))
         (json
-         (make-response (encode-json-to-string json) "application/json"))
+         (let* ((*lisp-identifier-name-to-json* 'identity)
+                (str (encode-json-to-string json)))
+           (make-response str "application/json")))
         (nothing
          (make-response ""))
         (plain

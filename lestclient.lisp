@@ -152,16 +152,12 @@
       (cons (string-capitalize (symbol-name key))
             val))))
 
-(defun handle-response (code headers content)
+(defun handle-json-response (code headers content)
   (let ((resp
          `((code . ,code)
            (data . ((body . ,content)
                     (headers . ,(headers-capitalize headers)))))))
     (render :json resp)))
-
-(defun handle-json-response (code headers content)
-  (let ((*lisp-identifier-name-to-json* 'identity))
-    (handle-response code headers content)))
 
 (defun method-pp (method)
   (let ((m (if (string= method "")
