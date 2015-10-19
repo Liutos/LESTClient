@@ -72,6 +72,39 @@
                 (symbol ele)))
           lambda-list))
 
+(defmacro define-easy-handler-no-verb ((name args body) (description lambda-list))
+  (let ((response (gensym)))
+    `(progn
+       ;; Unbind the previous generic function if exists
+       (when (and (fboundp ',name)
+                  (typep (symbol-function ',name) 'generic-function))
+         (fmakunbound ',name))
+
+       (defun ,name ,args ,@body)
+       (hunchentoot:define-easy-handler ,description ,lambda-list
+         (let ((,response (,name ,@args)))
+           (setf (content-type*) (response-content-type ,response))
+           (response-body ,response))))))
+
+(defmacro define-easy-handler-with-verb ((name verb args body) (description lambda-list))
+  (let ((response (gensym)))
+    `(progn
+       ;; Unbind the previous ordinary function
+       (when (and (fboundp ',name)
+                  (not (typep (symbol-function ',name) 'generic-function)))
+         (fmakunbound ',name))
+       ;; The first time to define the generic function
+       (unless (fboundp ',name)
+         (defgeneric ,name (verb ,@args)))
+
+       (defmethod ,name ((verb (eql ,verb)) ,@args)
+         (declare (ignorable verb))
+         ,@body)
+       (hunchentoot:define-easy-handler ,description ,lambda-list
+         (let ((,response (,name (request-method*) ,@args)))
+           (setf (content-type*) (response-content-type ,response))
+           (response-body ,response))))))
+
 (defun double-valid-p (&rest args)
   "Return T if there are more than one no-null value in `args'"
   (let ((cnt 0))
@@ -86,19 +119,10 @@
 (defmacro define-easy-handler (description lambda-list &body body)
   (multiple-value-bind (name description verb)
       (parse-description description)
-    (let ((args (parse-lambda-list lambda-list))
-          (response (gensym)))
-      `(progn
-         (defun ,name ,args ,@body)
-         (hunchentoot:define-easy-handler ,description ,lambda-list
-           (if (and ,verb (not (eq ,verb (request-method*))))
-               (progn
-                 (setf (return-code*) 404)
-                 (format nil "Action not found For request '~A ~A'"
-                         ,verb (request-uri*)))
-               (let ((,response (,name ,@args)))
-                 (setf (content-type*) (response-content-type ,response))
-                 (response-body ,response))))))))
+    (let ((args (parse-lambda-list lambda-list)))
+      (if verb
+          `(define-easy-handler-with-verb (,name ,verb ,args ,body) (,description ,lambda-list))
+          `(define-easy-handler-no-verb (,name ,args ,body) (,description ,lambda-list))))))
 
 (defun render (&key
                  file
