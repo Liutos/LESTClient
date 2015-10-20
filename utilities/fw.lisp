@@ -13,6 +13,9 @@
 
 (defclass application ()
   ((acceptor :accessor application-acceptor)
+   (access-log-destination :accessor application-access-log-destination
+                           :initarg :access-log-destination
+                           :initform *standard-output*)
    (document-root :accessor application-document-root
                   :initarg :document-root)
    (port :accessor application-port
@@ -25,7 +28,8 @@
 
 (defmethod initialize-instance :after ((instance application) &rest initargs)
   (declare (ignore initargs))
-  (setf-default (application-port instance) +PORT+))
+  (setf-default (application-port instance) +PORT+)
+  (setf-default (application-access-log-destination instance) *standard-output*))
 
 (defclass response ()
   ((body :initarg :body
@@ -151,11 +155,13 @@
          (make-response plain "text/plain"))))
 
 (defun init (&key
+               access-log-destination
                document-root
                port
                static-path
                static-root)
   (make-instance 'application
+                 :access-log-destination access-log-destination
                  :document-root document-root
                  :port port
                  :static-path static-path
@@ -164,6 +170,7 @@
 (defun start (&optional
                 (app *application*))
   (let ((acceptor (make-instance 'easy-acceptor
+                                 :access-log-destination (application-access-log-destination app)
                                  :document-root (application-document-root app)
                                  :port (application-port app))))
     (setf (application-acceptor app) acceptor)

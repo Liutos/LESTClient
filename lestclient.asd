@@ -11,7 +11,9 @@
                #:drakma
                #:hunchentoot
                #:local-time)
+  :serial t
   :components ((:module "utilities"
+                        :serial t
                         :components ((:file "package")
                                      (:file "fw")))
                (:file "package")

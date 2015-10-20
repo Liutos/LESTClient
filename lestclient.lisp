@@ -187,6 +187,7 @@
 (defun lest-start ()
   (setf *application*
         (init
+         :access-log-destination "access.log"
          :document-root *www*
          :port 4242
          :static-path "/static/"
