@@ -7,6 +7,7 @@
 
 ;;; Variable declarations
 (defvar *application*)
+(defvar *routes* (make-hash-table :test 'equal))
 
 ;;; Data type definitions
 (defconstant +PORT+ 4242)
@@ -55,17 +56,22 @@
 (defun parse-verb (args)
   (getf args :verb))
 
+(defun parse-uri (args)
+  (getf args :uri))
+
 (defun parse-description (description)
   (etypecase description
     (cons (destructuring-bind (name . args) description
             (let* ((verb (parse-verb args))
+                   (uri (parse-uri args))
                    (args (if verb
                              (append args '(:allow-other-keys t))
                              args)))
               (values name
                       (cons (handler-name name)
                             args)
-                      (parse-verb args)))))
+                      verb
+                      uri))))
     (symbol (values description
                     (handler-name description)))))
 
@@ -76,7 +82,11 @@
                 (symbol ele)))
           lambda-list))
 
-(defmacro define-easy-handler-no-verb ((name args body) (description lambda-list))
+(defun update-route (verb uri handler)
+  (let ((key (format nil "~A ~A" verb uri)))
+    (setf (gethash key *routes*) handler)))
+
+(defmacro define-easy-handler-no-verb ((name args body) (description uri lambda-list))
   (let ((response (gensym)))
     `(progn
        ;; Unbind the previous generic function if exists
@@ -88,9 +98,10 @@
        (hunchentoot:define-easy-handler ,description ,lambda-list
          (let ((,response (,name ,@args)))
            (setf (content-type*) (response-content-type ,response))
-           (response-body ,response))))))
+           (response-body ,response)))
+       (update-route nil ,uri ',name))))
 
-(defmacro define-easy-handler-with-verb ((name verb args body) (description lambda-list))
+(defmacro define-easy-handler-with-verb ((name verb args body) (description uri lambda-list))
   (let ((response (gensym)))
     `(progn
        ;; Unbind the previous ordinary function
@@ -107,7 +118,8 @@
        (hunchentoot:define-easy-handler ,description ,lambda-list
          (let ((,response (,name (request-method*) ,@args)))
            (setf (content-type*) (response-content-type ,response))
-           (response-body ,response))))))
+           (response-body ,response)))
+       (update-route ,verb ,uri ',name))))
 
 (defun double-valid-p (&rest args)
   "Return T if there are more than one no-null value in `args'"
@@ -121,12 +133,17 @@
 
 ;;; Public functions
 (defmacro define-easy-handler (description lambda-list &body body)
-  (multiple-value-bind (name description verb)
+  (multiple-value-bind (name description verb uri)
       (parse-description description)
     (let ((args (parse-lambda-list lambda-list)))
       (if verb
-          `(define-easy-handler-with-verb (,name ,verb ,args ,body) (,description ,lambda-list))
-          `(define-easy-handler-no-verb (,name ,args ,body) (,description ,lambda-list))))))
+          `(define-easy-handler-with-verb (,name ,verb ,args ,body) (,description ,uri ,lambda-list))
+          `(define-easy-handler-no-verb (,name ,args ,body) (,description ,uri ,lambda-list))))))
+
+(defun print-routes ()
+  (maphash #'(lambda (key handler)
+               (format t "~A => ~A" key handler))
+           *routes*))
 
 (defun render (&key
                  file

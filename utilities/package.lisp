@@ -9,6 +9,7 @@
            #:stop)
   (:export #:*application*
            #:init
+           #:print-routes
            #:render
            #:start
            #:stop))
