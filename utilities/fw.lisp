@@ -12,25 +12,19 @@
 ;;; Data type definitions
 (defconstant +PORT+ 4242)
 
-(defclass application ()
-  ((acceptor :accessor application-acceptor)
-   (access-log-destination :accessor application-access-log-destination
-                           :initarg :access-log-destination
-                           :initform *standard-output*)
-   (document-root :accessor application-document-root
-                  :initarg :document-root)
-   (port :accessor application-port
-         :initarg :port
-         :initform +PORT+)
-   (static-path :accessor application-static-path
+(defclass application (acceptor)
+  ((static-path :accessor application-static-path
                 :initarg :static-path)
    (static-root :accessor application-static-root
                 :initarg :static-root)))
 
-(defmethod initialize-instance :after ((instance application) &rest initargs)
-  (declare (ignore initargs))
-  (setf-default (application-port instance) +PORT+)
-  (setf-default (application-access-log-destination instance) *standard-output*))
+(defmethod acceptor-dispatch-request ((acceptor application) request)
+  (mapc (lambda (dispatcher)
+          (let ((handler (funcall dispatcher request)))
+            (when handler
+              (return-from acceptor-dispatch-request (funcall handler)))))
+        *dispatch-table*)
+  (call-next-method))
 
 (defclass response ()
   ((body :initarg :body
@@ -174,7 +168,7 @@
 (defun init (&key
                access-log-destination
                document-root
-               port
+               (port +PORT+)
                static-path
                static-root)
   (make-instance 'application
@@ -184,19 +178,13 @@
                  :static-path static-path
                  :static-root static-root))
 
-(defun start (&optional
-                (app *application*))
-  (let ((acceptor (make-instance 'easy-acceptor
-                                 :access-log-destination (application-access-log-destination app)
-                                 :document-root (application-document-root app)
-                                 :port (application-port app))))
-    (setf (application-acceptor app) acceptor)
-    (push (create-folder-dispatcher-and-handler (application-static-path app)
-                                                (application-static-root app))
-          *dispatch-table*)
-    (hunchentoot:start acceptor)))
+(defun start (&optional (app *application*))
+  (with-slots (static-path static-root) app
+    (push (create-folder-dispatcher-and-handler
+           static-path
+           static-root)
+          *dispatch-table*))
+  (hunchentoot:start app))
 
-(defun stop (&optional
-               (app *application*))
-  (let ((acceptor (application-acceptor app)))
-    (hunchentoot:stop acceptor)))
+(defun stop (&optional (app *application*))
+  (hunchentoot:stop app))
