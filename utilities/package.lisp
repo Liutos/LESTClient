@@ -8,6 +8,7 @@
            #:start
            #:stop)
   (:export #:*application*
+           #:define-handler
            #:init
            #:print-routes
            #:render

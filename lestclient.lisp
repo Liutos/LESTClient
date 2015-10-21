@@ -165,9 +165,7 @@
                method)))
     (intern (string-upcase m) :keyword)))
 
-(define-easy-handler (handle-api-request :uri "/api/request"
-                                         :verb :post)
-    (method url headers params)
+(define-handler :post "/api/request" handle-api-request (method url headers params)
   (declare (ignorable headers method params))
   (let ((ap (headers->alist headers))
         (method (method-pp method))

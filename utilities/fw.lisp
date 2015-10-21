@@ -7,7 +7,7 @@
 
 ;;; Variable declarations
 (defvar *application*)
-(defvar *routes* (make-hash-table :test 'equal))
+(defvar *routes* '())
 
 ;;; Data type definitions
 (defconstant +PORT+ 4242)
@@ -18,13 +18,25 @@
    (static-root :accessor application-static-root
                 :initarg :static-root)))
 
+(defun dispatch-handler (request)
+  (dolist (rule *routes*)
+    (etypecase rule
+      (cons
+       (destructuring-bind (verb uri name) rule
+         (when (and (or (eq verb :*)
+                        (eq (request-method request) verb))
+                    (string= (script-name request) uri))
+           (return (symbol-function name)))))
+      (function                         ; Adapt the dispatcher created by `create-folder-dispatcher-and-handler'
+       (let ((handler (funcall rule request)))
+         (when handler
+           (return handler)))))))
+
 (defmethod acceptor-dispatch-request ((acceptor application) request)
-  (mapc (lambda (dispatcher)
-          (let ((handler (funcall dispatcher request)))
-            (when handler
-              (return-from acceptor-dispatch-request (funcall handler)))))
-        *dispatch-table*)
-  (call-next-method))
+  (let ((handler (dispatch-handler request)))
+    (if handler
+        (funcall handler)
+        (call-next-method))))
 
 (defclass response ()
   ((body :initarg :body
@@ -134,10 +146,28 @@
           `(define-easy-handler-with-verb (,name ,verb ,args ,body) (,description ,uri ,lambda-list))
           `(define-easy-handler-no-verb (,name ,args ,body) (,description ,uri ,lambda-list))))))
 
+(defmacro define-handler (verb uri name lambda-list &body body)
+  (let ((handler (intern (format nil "~A/~A" verb name)))
+        (response (gensym)))
+    `(progn
+       (defun ,name ,lambda-list ,@body)
+       (defun ,handler ()
+         (let ,(mapcar #'(lambda (var)
+                           `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both)))
+                       lambda-list)
+           (let ((,response (,name ,@lambda-list)))
+             (cond ((typep ,response 'response)
+                    (setf (content-type*) (response-content-type ,response))
+                    (response-body ,response))
+                   (t ,response)))))
+       (push '(,verb ,uri ,handler)
+             *routes*))))
+
 (defun print-routes ()
-  (maphash #'(lambda (key handler)
-               (format t "~A => ~A" key handler))
-           *routes*))
+  (dolist (rule *routes*)
+    (when (consp rule)
+      (destructuring-bind (verb uri name) rule
+        (format t "~A ~A => ~A~%" verb uri name)))))
 
 (defun render (&key
                  file
@@ -183,7 +213,7 @@
     (push (create-folder-dispatcher-and-handler
            static-path
            static-root)
-          *dispatch-table*))
+          *routes*))
   (hunchentoot:start app))
 
 (defun stop (&optional (app *application*))
