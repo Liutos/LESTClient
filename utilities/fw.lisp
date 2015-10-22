@@ -7,6 +7,7 @@
 
 ;;; Variable declarations
 (defvar *application*)
+(defvar *console-output* *standard-output*)
 (defvar *routes* '())
 
 ;;; Data type definitions
@@ -155,7 +156,8 @@
          (let ,(mapcar #'(lambda (var)
                            `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both)))
                        lambda-list)
-           (let ((,response (,name ,@lambda-list)))
+           (let ((,response (let ((*standard-output* *console-output*))
+                              (,name ,@lambda-list))))
              (cond ((typep ,response 'response)
                     (setf (content-type*) (response-content-type ,response))
                     (response-body ,response))
