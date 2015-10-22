@@ -10,7 +10,8 @@
                #:cl-ppcre
                #:drakma
                #:hunchentoot
-               #:local-time)
+               #:local-time
+               #:metabang-bind)
   :serial t
   :components ((:module "utilities"
                         :serial t

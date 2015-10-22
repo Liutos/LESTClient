@@ -18,7 +18,7 @@
 (defvar *code-ok* 1000)
 
 (defparameter *builtin-headers*
-  '(user-agent))
+  '(("User-Agent" . :user-agent)))
 
 (defmacro mapeach (list pair-var &body body)
   `(mapcar (lambda (,pair-var)
@@ -29,10 +29,18 @@
   (unless headers
     (setf headers "{}"))
   (let* ((*json-identifier-name-to-lisp* 'string-capitalize)
-         (ht (decode-json-from-string headers)))
-    (mapeach ht pair
+         (ht (decode-json-from-string headers))
+         (ah '())                       ; Additional Headers
+         (kh '()))                      ; Keyword Headers
+    (dolist (pair ht)
       (destructuring-bind (key . val) pair
-        (cons (symbol-name key) (lambda () val))))))
+        (let ((it (assoc key *builtin-headers* :test #'string=)))
+          (if it
+              (progn
+                (push val kh)
+                (push (cdr it) kh))
+              (push (cons (symbol-name key) (lambda () val)) ah)))))
+    (values ah kh)))
 
 (defun type-integer-pp (val)
   (let ((res (register-groups-bind (s e)
@@ -167,15 +175,13 @@
 
 (define-handler :post "/api/request" handle-api-request (method url headers params)
   (declare (ignorable headers method params))
-  (let ((ap (headers->alist headers))
-        (method (method-pp method))
-        (ps (params->alist params)))
+  (bind (((:values ah kh) (headers->alist headers))
+         (method (method-pp method))
+         (ps (params->alist params)))
     (multiple-value-bind (body code headers)
-        (http-request
-         url
-         :additional-headers ap
-         :method method
-         :parameters ps)
+        (apply #'http-request
+               url
+               `(,@kh :additional-headers ,ah :method ,method :parameters ,ps))
       (declare (ignorable body code))
       (handle-json-response *code-ok* headers body))))
 

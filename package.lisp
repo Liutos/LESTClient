@@ -6,6 +6,7 @@
         #:json
         #:cl-ppcre
         #:hunchentoot
+        #:metabang.bind
 
         #:com.liutos.fw)
   (:import-from #:local-time
