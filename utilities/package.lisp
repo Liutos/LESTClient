@@ -5,6 +5,7 @@
         #:cl-ppcre
         #:hunchentoot
         #:json
+        #:metabang.bind
         #:md5)
   (:shadow #:define-easy-handler
            #:start

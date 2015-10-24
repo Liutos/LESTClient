@@ -85,11 +85,12 @@
                     (handler-name description)))))
 
 (defun parse-lambda-list (lambda-list)
-  (mapcar #'(lambda (ele)
-              (etypecase ele
-                (cons (first ele))
-                (symbol ele)))
-          lambda-list))
+  (let ((args '()))
+    (dolist (var lambda-list)
+      (when (char= (char (symbol-name var) 0) #\&)
+        (return))
+      (push var args))
+    (nreverse args)))
 
 (defun update-route (verb uri handler)
   (let ((key (format nil "~A ~A" verb uri)))
@@ -130,6 +131,31 @@
            (response-body ,response)))
        (update-route ,verb ,uri ',name))))
 
+(defmacro with-io-control (lambda-list expr)
+  (let ((response (gensym)))
+    `(let ,(mapcar #'(lambda (var)
+                       `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both)))
+                   lambda-list)
+       (let ((,response (let ((*standard-output* *console-output*))
+                          ,expr)))
+         (cond ((typep ,response 'response)
+                (setf (content-type*) (response-content-type ,response))
+                (response-body ,response))
+               (t ,response))))))
+
+(defparameter *placeholder* ":[^/]+")
+
+(defun parse-vars-and-uri (uri)
+  (let ((names (all-matches-as-strings *placeholder* uri))
+        (new-uri (regex-replace-all *placeholder* uri "([^/]+)")))
+    (values (mapcar #'(lambda (name)
+                        (intern (string-upcase (subseq name 1))))
+                    names)
+            new-uri
+            (mapcar #'(lambda (name)
+                        (intern (string-upcase (subseq name 1)) :keyword))
+                    names))))
+
 (defun double-valid-p (&rest args)
   "Return T if there are more than one no-null value in `args'"
   (let ((cnt 0))
@@ -142,7 +168,8 @@
 
 (defun ensure-route (verb uri handler)
   (unless (find-if #'(lambda (rule)
-                       (and (eq (first rule) verb)
+                       (and (consp rule)
+                            (eq (first rule) verb)
                             (equal (second rule) uri)
                             (eq (third rule) handler)))
                    *routes*)
@@ -159,21 +186,24 @@
           `(define-easy-handler-no-verb (,name ,args ,body) (,description ,uri ,lambda-list))))))
 
 (defmacro define-handler (verb uri name lambda-list &body body)
-  (let ((handler (intern (format nil "~A/~A" verb name)))
-        (response (gensym))
-        (uri (parse-string uri)))
+  (bind ((args (parse-lambda-list lambda-list))
+         (handler (intern (format nil "~A/~A" verb name)))
+         ((:values uriargs regex keys) (parse-vars-and-uri uri))
+         (uri (parse-string regex)))
     `(progn
        (defun ,name ,lambda-list ,@body)
        (defun ,handler ()
-         (let ,(mapcar #'(lambda (var)
-                           `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both)))
-                       lambda-list)
-           (let ((,response (let ((*standard-output* *console-output*))
-                              (,name ,@lambda-list))))
-             (cond ((typep ,response 'response)
-                    (setf (content-type*) (response-content-type ,response))
-                    (response-body ,response))
-                   (t ,response)))))
+         (with-io-control ,args
+           ,(if uriargs
+                (let ((result (gensym)))
+                  `(let (,result)
+                     (do-register-groups ,uriargs
+                         (,regex (script-name*))
+                       (setf ,result
+                             (,name ,@args
+                                    ,@(mapcan #'list keys uriargs))))
+                     ,result))
+                `(,name ,@args))))
        (ensure-route ,verb ',uri ',handler))))
 
 (defun md5 (str &key (upper-case-p nil))
@@ -221,12 +251,14 @@
 (defun init (&key
                (access-log-destination *standard-output*)
                document-root
+               (message-log-destination *standard-output*)
                (port +PORT+)
                static-path
                static-root)
   (make-instance 'application
                  :access-log-destination access-log-destination
                  :document-root document-root
+                 :message-log-destination message-log-destination
                  :port port
                  :static-path static-path
                  :static-root static-root))
