@@ -26,7 +26,9 @@
        (destructuring-bind (verb uri name) rule
          (when (and (or (eq verb :*)
                         (eq (request-method request) verb))
-                    (string= (script-name request) uri))
+                    (etypecase uri
+                      (cons (scan uri (script-name request)))
+                      (string (string= (script-name request) uri))))
            (return (symbol-function name)))))
       (function                         ; Adapt the dispatcher created by `create-folder-dispatcher-and-handler'
        (let ((handler (funcall rule request)))
@@ -138,6 +140,15 @@
         (return-from double-valid-p t)))
     nil))
 
+(defun ensure-route (verb uri handler)
+  (unless (find-if #'(lambda (rule)
+                       (and (eq (first rule) verb)
+                            (equal (second rule) uri)
+                            (eq (third rule) handler)))
+                   *routes*)
+    (push (list verb uri handler)
+          *routes*)))
+
 ;;; Public functions
 (defmacro define-easy-handler (description lambda-list &body body)
   (multiple-value-bind (name description verb uri)
@@ -149,7 +160,8 @@
 
 (defmacro define-handler (verb uri name lambda-list &body body)
   (let ((handler (intern (format nil "~A/~A" verb name)))
-        (response (gensym)))
+        (response (gensym))
+        (uri (parse-string uri)))
     `(progn
        (defun ,name ,lambda-list ,@body)
        (defun ,handler ()
@@ -162,8 +174,17 @@
                     (setf (content-type*) (response-content-type ,response))
                     (response-body ,response))
                    (t ,response)))))
-       (push '(,verb ,uri ,handler)
-             *routes*))))
+       (ensure-route ,verb ',uri ',handler))))
+
+(defun md5 (str &key (upper-case-p nil))
+  (declare (type string str))
+  (let* ((sum (md5sum-string str))
+         (hex (with-output-to-string (s)
+                (dotimes (i (length sum))
+                  (format s "~(~2,'0X~)" (aref sum i))))))
+    (if upper-case-p
+        (string-upcase hex)
+        hex)))
 
 (defun print-routes ()
   (dolist (rule *routes*)
@@ -198,7 +219,7 @@
          (make-response plain "text/plain"))))
 
 (defun init (&key
-               access-log-destination
+               (access-log-destination *standard-output*)
                document-root
                (port +PORT+)
                static-path

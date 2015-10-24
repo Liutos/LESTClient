@@ -11,6 +11,7 @@
                #:drakma
                #:hunchentoot
                #:local-time
+               #:md5
                #:metabang-bind)
   :serial t
   :components ((:module "utilities"
