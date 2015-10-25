@@ -11,6 +11,16 @@
 (defvar *routes* '())
 
 ;;; Data type definitions
+(defclass route-rule ()
+  ((handler :initarg :handler
+            :reader route-rule-handler)
+   (path :initarg :path
+         :reader route-rule-path)
+   (regex :initarg :regex
+          :reader route-rule-regex)
+   (verb :initarg :verb
+         :reader route-rule-verb)))
+
 (defconstant +PORT+ 4242)
 
 (defclass application (acceptor)
@@ -22,18 +32,15 @@
 (defun dispatch-handler (request)
   (dolist (rule *routes*)
     (etypecase rule
-      (cons
-       (destructuring-bind (verb uri name) rule
-         (when (and (or (eq verb :*)
-                        (eq (request-method request) verb))
-                    (etypecase uri
-                      (cons (scan uri (script-name request)))
-                      (string (string= (script-name request) uri))))
-           (return (symbol-function name)))))
       (function                         ; Adapt the dispatcher created by `create-folder-dispatcher-and-handler'
        (let ((handler (funcall rule request)))
          (when handler
-           (return handler)))))))
+           (return handler))))
+      (route-rule
+       (with-slots (handler regex verb) rule
+         (when (and (or (eq verb :*) (eq (request-method request) verb)) ; No verb requirement or match
+                    (scan regex (script-name request)))
+           (return (symbol-function handler))))))))
 
 (defmethod acceptor-dispatch-request ((acceptor application) request)
   (let ((handler (dispatch-handler request)))
@@ -166,14 +173,18 @@
         (return-from double-valid-p t)))
     nil))
 
-(defun ensure-route (verb uri handler)
+(defun ensure-route (verb path uri handler)
   (unless (find-if #'(lambda (rule)
-                       (and (consp rule)
-                            (eq (first rule) verb)
-                            (equal (second rule) uri)
-                            (eq (third rule) handler)))
+                       (and (typep rule 'route-rule)
+                            (eq (route-rule-verb rule) verb)
+                            (equal (route-rule-regex rule) uri)
+                            (eq (route-rule-handler rule) handler)))
                    *routes*)
-    (push (list verb uri handler)
+    (push (make-instance 'route-rule
+                         :handler handler
+                         :path path
+                         :regex uri
+                         :verb verb)
           *routes*)))
 
 ;;; Public functions
@@ -185,10 +196,10 @@
           `(define-easy-handler-with-verb (,name ,verb ,args ,body) (,description ,uri ,lambda-list))
           `(define-easy-handler-no-verb (,name ,args ,body) (,description ,uri ,lambda-list))))))
 
-(defmacro define-handler (verb uri name lambda-list &body body)
+(defmacro define-handler (verb path name lambda-list &body body)
   (bind ((args (parse-lambda-list lambda-list))
          (handler (intern (format nil "~A/~A" verb name)))
-         ((:values uriargs regex keys) (parse-vars-and-uri uri))
+         ((:values uriargs regex keys) (parse-vars-and-uri path))
          (uri (parse-string regex)))
     `(progn
        (defun ,name ,lambda-list ,@body)
@@ -204,7 +215,7 @@
                                     ,@(mapcan #'list keys uriargs))))
                      ,result))
                 `(,name ,@args))))
-       (ensure-route ,verb ',uri ',handler))))
+       (ensure-route ,verb ,path ',uri ',handler))))
 
 (defun md5 (str &key (upper-case-p nil))
   (declare (type string str))
@@ -218,9 +229,9 @@
 
 (defun print-routes ()
   (dolist (rule *routes*)
-    (when (consp rule)
-      (destructuring-bind (verb uri name) rule
-        (format t "~A ~A => ~A~%" verb uri name)))))
+    (when (typep rule 'route-rule)
+      (with-slots (handler path regex verb) rule
+        (format t "~A ~A => ~A~%" verb path handler)))))
 
 (defun render (&key
                  file
