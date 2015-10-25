@@ -32,15 +32,13 @@
 (defun dispatch-handler (request)
   (dolist (rule *routes*)
     (etypecase rule
-      (function                         ; Adapt the dispatcher created by `create-folder-dispatcher-and-handler'
-       (let ((handler (funcall rule request)))
-         (when handler
-           (return handler))))
       (route-rule
        (with-slots (handler regex verb) rule
          (when (and (or (eq verb :*) (eq (request-method request) verb)) ; No verb requirement or match
                     (scan regex (script-name request)))
-           (return (symbol-function handler))))))))
+           (if (symbolp handler)
+               (return (symbol-function handler))
+               (return handler))))))))
 
 (defmethod acceptor-dispatch-request ((acceptor application) request)
   (let ((handler (dispatch-handler request)))
@@ -217,6 +215,16 @@
                 `(,name ,@args))))
        (ensure-route ,verb ,path ',uri ',handler))))
 
+(defun define-folder-handler (uri-prefix base-path)
+  (let* ((path (concatenate 'string "^" uri-prefix "(.+)"))
+         (regex (parse-string path)))
+    (flet ((handler ()
+             (do-register-groups (suffix)
+                 (regex (script-name*))
+               (let ((path (concatenate 'string (namestring base-path) suffix)))
+                 (return-from handler (handle-static-file path))))))
+      (ensure-route :* path regex #'handler))))
+
 (defun md5 (str &key (upper-case-p nil))
   (declare (type string str))
   (let* ((sum (md5sum-string str))
@@ -276,10 +284,7 @@
 
 (defun start (&optional (app *application*))
   (with-slots (static-path static-root) app
-    (push (create-folder-dispatcher-and-handler
-           static-path
-           static-root)
-          *routes*))
+    (define-folder-handler static-path static-root))
   (hunchentoot:start app))
 
 (defun stop (&optional (app *application*))
