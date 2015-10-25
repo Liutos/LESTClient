@@ -90,12 +90,11 @@
                     (handler-name description)))))
 
 (defun parse-lambda-list (lambda-list)
-  (let ((args '()))
-    (dolist (var lambda-list)
-      (when (char= (char (symbol-name var) 0) #\&)
-        (return))
-      (push var args))
-    (nreverse args)))
+  (multiple-value-bind (reqs opts)
+      (split-lambda-list lambda-list)
+    (values (append reqs
+                    (mapcar #'(lambda (e) (if (consp e) (car e) e)) opts))
+            (append reqs opts))))
 
 (defun update-route (verb uri handler)
   (let ((key (format nil "~A ~A" verb uri)))
@@ -139,7 +138,11 @@
 (defmacro with-io-control (lambda-list expr)
   (let ((response (gensym)))
     `(let ,(mapcar #'(lambda (var)
-                       `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both)))
+                       (if (consp var)
+                           `(,(first var)
+                              (or (hunchentoot::compute-parameter ,(format nil "~(~A~)" (first var)) 'string :both)
+                                  ,(second var)))
+                           `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both))))
                    lambda-list)
        (let ((,response (let ((*standard-output* *console-output*))
                           ,expr)))
@@ -195,14 +198,14 @@
           `(define-easy-handler-no-verb (,name ,args ,body) (,description ,uri ,lambda-list))))))
 
 (defmacro define-handler (verb path name lambda-list &body body)
-  (bind ((args (parse-lambda-list lambda-list))
+  (bind (((:values args defs) (parse-lambda-list lambda-list))
          (handler (intern (format nil "~A/~A" verb name)))
          ((:values uriargs regex keys) (parse-vars-and-uri path))
          (uri (parse-string regex)))
     `(progn
        (defun ,name ,lambda-list ,@body)
        (defun ,handler ()
-         (with-io-control ,args
+         (with-io-control ,defs
            ,(if uriargs
                 (let ((result (gensym)))
                   `(let (,result)

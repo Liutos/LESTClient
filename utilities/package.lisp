@@ -2,6 +2,7 @@
 
 (defpackage #:com.liutos.fw
   (:use #:cl
+        #:alexandria
         #:cl-ppcre
         #:hunchentoot
         #:json
