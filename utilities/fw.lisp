@@ -1,6 +1,11 @@
 (in-package #:com.liutos.fw)
 
 ;;; Utilities
+(defmacro define-func (name args &body body)
+  `(defun ,name ,args
+     (symbol-macrolet ((__func__ ',name))
+       ,@body)))
+
 (defmacro setf-default (place new-value)
   `(when (null ,place)
      (setf ,place ,new-value)))
@@ -135,6 +140,11 @@
            (response-body ,response)))
        (update-route ,verb ,uri ',name))))
 
+(define-func debug-post-parameters ()
+  (loop
+     :for (k . v) :in (post-parameters*)
+     :do (format t "[DEBUG / ~(~A~)] ~S = ~S~%" __func__ k v)))
+
 (defmacro with-io-control (lambda-list expr)
   (let ((response (gensym)))
     `(let ,(mapcar #'(lambda (var)
@@ -144,8 +154,10 @@
                                   ,(second var)))
                            `(,var (hunchentoot::compute-parameter ,(format nil "~(~A~)" var) 'string :both))))
                    lambda-list)
-       (let ((,response (let ((*standard-output* *console-output*))
-                          ,expr)))
+       (let* ((*standard-output* *console-output*)
+              (,response))
+         (debug-post-parameters)
+         (setf ,response (progn ,expr))
          (cond ((typep ,response 'response)
                 (setf (content-type*) (response-content-type ,response))
                 (response-body ,response))
