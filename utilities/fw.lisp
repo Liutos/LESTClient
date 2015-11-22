@@ -140,6 +140,11 @@
            (response-body ,response)))
        (update-route ,verb ,uri ',name))))
 
+(define-func debug-headers-in ()
+  (loop
+     :for (k . v) :in (headers-in*)
+     :do (format t "[DEBUG / ~(~A~)] ~S = ~S~%" __func__ k v)))
+
 (define-func debug-post-parameters ()
   (loop
      :for (k . v) :in (post-parameters*)
@@ -156,6 +161,7 @@
                    lambda-list)
        (let* ((*standard-output* *console-output*)
               (,response))
+         (debug-headers-in)
          (debug-post-parameters)
          (setf ,response (progn ,expr))
          (cond ((typep ,response 'response)
