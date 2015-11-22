@@ -230,6 +230,9 @@
                 `(,name ,@args))))
        (ensure-route ,verb ,path ',uri ',handler))))
 
+(defun clear-routes ()
+  (setf *routes* '()))
+
 (defun define-folder-handler (uri-prefix base-path)
   (let* ((path (concatenate 'string "^" uri-prefix "(.+)"))
          (regex (parse-string path)))
@@ -299,7 +302,8 @@
 
 (defun start (&optional (app *application*))
   (with-slots (static-path static-root) app
-    (define-folder-handler static-path static-root))
+    (when (and static-path static-root)
+      (define-folder-handler static-path static-root)))
   (hunchentoot:start app))
 
 (defun stop (&optional (app *application*))

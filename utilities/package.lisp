@@ -12,6 +12,7 @@
            #:start
            #:stop)
   (:export #:*application*
+           #:clear-routes
            #:define-handler
            #:init
            #:md5
