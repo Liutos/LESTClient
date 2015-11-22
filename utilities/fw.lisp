@@ -40,7 +40,9 @@
       (route-rule
        (with-slots (handler regex verb) rule
          (when (and (or (eq verb :*) (eq (request-method request) verb)) ; No verb requirement or match
-                    (scan regex (script-name request)))
+                    (if (stringp regex)
+                        (string= regex (script-name request))
+                        (scan regex (script-name request))))
            (if (symbolp handler)
                (return (symbol-function handler))
                (return handler))))))))
@@ -202,7 +204,7 @@
     (push (make-instance 'route-rule
                          :handler handler
                          :path path
-                         :regex uri
+                         :regex (if (characterp uri) (string uri) uri)
                          :verb verb)
           *routes*)))
 
