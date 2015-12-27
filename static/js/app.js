@@ -74,14 +74,17 @@ function fill_resp_headers(headers) {
     $('#response-headers').html(html);
 }
 
+// 点击发送请求的按钮
 $('#request-send').on('click', function () {
     var headers = collect_headers();
     var params = collect_params();
+    var body = $('#input-body').val();
     var method = $('#input-method').val();
     var url = $('#input-url').val();
     var api = '/api/request';
     $.ajax({
         data: {
+            body: body,
             headers: headers,
             method: method,
             params: params,

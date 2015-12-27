@@ -173,7 +173,7 @@
                method)))
     (intern (string-upcase m) :keyword)))
 
-(define-handler :post "/api/request" handle-api-request (method url headers params)
+(define-handler :post "/api/request" handle-api-request (method url body headers params)
   (declare (ignorable headers method params))
   (bind (((:values ah kh) (headers->alist headers))
          (method (method-pp method))
@@ -181,9 +181,16 @@
     (multiple-value-bind (body code headers)
         (apply #'http-request
                url
-               `(,@kh :additional-headers ,ah :method ,method :parameters ,ps))
+               `(,@kh :additional-headers ,ah
+                      :content ,body
+                      :method ,method
+                      :parameters ,ps))
       (declare (ignorable body code))
       (handle-json-response *code-ok* headers body))))
+
+(define-handler :put "/mock" handle-mock ()
+  (with-http-body ((msg) :parser :qs)
+    (render :plain msg)))
 
 ;;; Public
 
