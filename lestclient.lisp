@@ -12,5 +12,5 @@
   "请求目标接口"
   (let ((form (eloquent.mvc.request:getextra :body request)))
     (let ((url (eloquent.mvc.prelude:string-assoc "url" form)))
-      (eloquent.mvc.response:respond-json
-       `((data . ((body . ,url))))))))
+      (eloquent.mvc.response:respond
+       (drakma:http-request url)))))
