@@ -7,7 +7,8 @@
 </head>
 <body>
   <div id="app">
-    {{ message }}
+    <input v-bind:value="message" />
+    <input type="submit" v-on:click="echoMessage" value="请求" />
   </div>
   <script src="/static/js/app.js"></script>
 </body>
