@@ -10,7 +10,8 @@
 
 (defun api-request (request)
   "请求目标接口"
-  (let ((form (eloquent.mvc.request:getextra :body request)))
-    (let ((url (eloquent.mvc.prelude:string-assoc "url" form)))
-      (eloquent.mvc.response:respond
-       (drakma:http-request url)))))
+  (eloquent.mvc.controller:json-body-bind
+      ((url "url" :requirep t))
+      request
+    (eloquent.mvc.response:respond
+     (drakma:http-request url))))
