@@ -1,7 +1,8 @@
 var app = new Vue({
   el: '#app',
   data: {
-    message: 'Welcome to LESTClient!'
+    message: 'http://example.com',
+    response: 'Here comes response'
   },
   methods: {
     echoMessage: function () {
@@ -10,9 +11,10 @@ var app = new Vue({
       }, {
         'Content-Type': 'application/json'
       }).then(response => {
-        console.log('SUCCEED');
+        const body = response.body;
+        this.response = body;
       }, response => {
-        console.log('FAIL');
+        this.response = 'FAIL';
       });
     }
   }

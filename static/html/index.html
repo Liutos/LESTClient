@@ -10,6 +10,9 @@
   <div id="app">
     <input v-model="message" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
+    <div>
+      <pre>{{ response }}</pre>
+    </div>
   </div>
   <script src="/static/js/app.js"></script>
 </body>
