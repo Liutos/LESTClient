@@ -1,13 +1,15 @@
 var app = new Vue({
   el: '#app',
   data: {
-    message: 'http://example.com',
+    method: 'GET',
+    url: 'http://example.com',
     response: 'Here comes response'
   },
   methods: {
     echoMessage: function () {
       Vue.http.post('/api/request', {
-        url: this.message
+        method: this.method,
+        url: this.url
       }, {
         'Content-Type': 'application/json'
       }).then(response => {

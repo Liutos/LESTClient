@@ -8,7 +8,8 @@
 </head>
 <body>
   <div id="app">
-    <input v-model="message" />
+    <input v-model="method" />
+    <input v-model="url" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
     <div>
       <pre>{{ response }}</pre>

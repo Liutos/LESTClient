@@ -11,7 +11,9 @@
 (defun api-request (request)
   "请求目标接口"
   (eloquent.mvc.controller:json-body-bind
-      ((url "url" :requirep t))
+      ((method "method" :requirep t)
+       (url "url" :requirep t))
       request
     (eloquent.mvc.response:respond
-     (drakma:http-request url))))
+     (drakma:http-request url
+                          :method (eloquent.mvc.prelude:make-keyword method)))))
