@@ -3,11 +3,13 @@ var app = new Vue({
   data: {
     method: 'GET',
     url: 'http://example.com',
-    response: 'Here comes response'
+    response: 'Here comes response',
+    requestBody: 'Content for test'
   },
   methods: {
     echoMessage: function () {
       Vue.http.post('/api/request', {
+        body: this.requestBody,
         method: this.method,
         qs: [
           {

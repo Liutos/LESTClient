@@ -11,13 +11,15 @@
 (defun api-request (request)
   "请求目标接口"
   (eloquent.mvc.controller:json-body-bind
-      ((method "method" :requirep t)
+      ((body "body")
+       (method "method" :requirep t)
        (qs "qs")
        (url "url" :requirep t))
       request
-    (format t "qs: ~A~%" qs)
+    (format t "body: ~S~%" body)
     (eloquent.mvc.response:respond
      (drakma:http-request url
+                          :content body
                           :method (eloquent.mvc.prelude:make-keyword method)
                           :parameters (mapcar #'(lambda (pair)
                                                   (cons (cdar pair)
