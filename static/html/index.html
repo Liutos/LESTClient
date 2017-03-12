@@ -15,6 +15,9 @@
       <option>PUT</option>
     </select>
     <input v-model="url" />
+    <ul>
+      <li><input placeholder="query string参数名" v-model="queryKey" /><input placeholder="query string参数值" v-model="queryValue" /></li>
+    </ul>
     <input type="submit" v-on:click="echoMessage" value="请求" />
     <div>
       <pre>{{ response }}</pre>

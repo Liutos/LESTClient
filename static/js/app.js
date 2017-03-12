@@ -9,6 +9,12 @@ var app = new Vue({
     echoMessage: function () {
       Vue.http.post('/api/request', {
         method: this.method,
+        qs: [
+          {
+            key: this.queryKey,
+            value: this.queryValue
+          },
+        ],
         url: this.url
       }, {
         'Content-Type': 'application/json'

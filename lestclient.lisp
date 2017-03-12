@@ -12,8 +12,14 @@
   "请求目标接口"
   (eloquent.mvc.controller:json-body-bind
       ((method "method" :requirep t)
+       (qs "qs")
        (url "url" :requirep t))
       request
+    (format t "qs: ~A~%" qs)
     (eloquent.mvc.response:respond
      (drakma:http-request url
-                          :method (eloquent.mvc.prelude:make-keyword method)))))
+                          :method (eloquent.mvc.prelude:make-keyword method)
+                          :parameters (mapcar #'(lambda (pair)
+                                                  (cons (cdar pair)
+                                                        (cdadr pair)))
+                                              qs)))))
