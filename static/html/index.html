@@ -8,7 +8,12 @@
 </head>
 <body>
   <div id="app">
-    <input v-model="method" />
+    <select v-model="method">
+      <option>DELETE</option>
+      <option>GET</option>
+      <option>POST</option>
+      <option>PUT</option>
+    </select>
     <input v-model="url" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
     <div>
