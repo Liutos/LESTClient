@@ -20,6 +20,10 @@
     (format t "header: ~S~%" header)
     (eloquent.mvc.response:respond
      (drakma:http-request url
+                          :additional-headers (mapcar #'(lambda (pair)
+                                                          (cons (cdar pair)
+                                                                (cdadr pair)))
+                                                      header)
                           :content body
                           :method (eloquent.mvc.prelude:make-keyword method)
                           :parameters (mapcar #'(lambda (pair)
