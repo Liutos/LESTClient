@@ -2,6 +2,15 @@
 
 (in-package #:lestclient)
 
+(defun pairs-to-alist (pairs)
+  "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in DRAKMA:HTTP-REQUEST"
+  (mapcar #'(lambda (pair)
+              (cons (cdr (first pair))
+                    (cdr (second pair))))
+          pairs))
+
+;;; EXPORT
+
 (defun home (request)
   "响应首页内容"
   (declare (ignorable request))
@@ -17,16 +26,9 @@
        (qs "qs")
        (url "url" :requirep t))
       request
-    (format t "header: ~S~%" header)
     (eloquent.mvc.response:respond
      (drakma:http-request url
-                          :additional-headers (mapcar #'(lambda (pair)
-                                                          (cons (cdar pair)
-                                                                (cdadr pair)))
-                                                      header)
+                          :additional-headers (pairs-to-alist header)
                           :content body
                           :method (eloquent.mvc.prelude:make-keyword method)
-                          :parameters (mapcar #'(lambda (pair)
-                                                  (cons (cdar pair)
-                                                        (cdadr pair)))
-                                              qs)))))
+                          :parameters (pairs-to-alist qs)))))
