@@ -10,6 +10,12 @@ var app = new Vue({
     echoMessage: function () {
       Vue.http.post('/api/request', {
         body: this.requestBody,
+        header: [
+          {
+            key: this.headerKey,
+            value: this.headerValue
+          }
+        ],
         method: this.method,
         qs: [
           {

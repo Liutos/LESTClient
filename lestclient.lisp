@@ -12,11 +12,12 @@
   "请求目标接口"
   (eloquent.mvc.controller:json-body-bind
       ((body "body")
+       (header "header")
        (method "method" :requirep t)
        (qs "qs")
        (url "url" :requirep t))
       request
-    (format t "body: ~S~%" body)
+    (format t "header: ~S~%" header)
     (eloquent.mvc.response:respond
      (drakma:http-request url
                           :content body
