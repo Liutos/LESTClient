@@ -21,8 +21,7 @@
     <ul>
       <li><input placeholder="HTTP头部字段名" v-model="headerKey" /><input placeholder="HTTP头部字段值" v-model="headerValue" /></li>
     </ul>
-    <textarea>
-      {{ requestBody }}
+    <textarea v-model="requestBody">
     </textarea>
     <input type="submit" v-on:click="echoMessage" value="请求" />
     <div>
