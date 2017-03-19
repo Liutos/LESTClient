@@ -14,8 +14,10 @@
 (defun home (request)
   "响应首页内容"
   (declare (ignorable request))
-  (eloquent.mvc.response:respond
-   #P"/home/liutos/src/cl/LESTClient/static/html/index.html"))
+  (let* ((config eloquent.mvc.config:*config*)
+         (root (eloquent.mvc.config:get-application-root config))
+         (home-page (merge-pathnames "static/html/index.html" root)))
+    (eloquent.mvc.response:respond home-page)))
 
 (defun api-request (request)
   "请求目标接口"
