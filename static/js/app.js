@@ -30,7 +30,12 @@ var app = new Vue({
       }).then(response => {
         const body = response.body;
         const data = body.data;
-        this.response = data.content;
+        const success = body.success;
+        if (success) {
+          this.response = data.content;
+        } else {
+          this.response = body.error;
+        }
       }, response => {
         this.response = 'FAIL';
       });

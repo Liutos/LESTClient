@@ -29,21 +29,26 @@
        (timeout "timeout" :type :integer)
        (url "url" :requirep t))
       request
-    (multiple-value-bind (body status-code headers)
-        (drakma:http-request url
-                             :additional-headers (pairs-to-alist header)
-                             :connection-timeout timeout
-                             :content body
-                             :method (eloquent.mvc.prelude:make-keyword method)
-                             :parameters (pairs-to-alist qs))
-      (declare (ignorable status-code))
-      (eloquent.mvc.response:respond-json
-       `(("data" . (("content" . ,body)
-                    ("headers" . ,(mapcar #'(lambda (header)
-                                              `(("field" . ,(car header))
-                                                ("value" . ,(cdr header))))
-                                          headers))))
-         ("success" . t))))))
+    (handler-case
+        (multiple-value-bind (body status-code headers)
+            (drakma:http-request url
+                                 :additional-headers (pairs-to-alist header)
+                                 :connection-timeout timeout
+                                 :content body
+                                 :method (eloquent.mvc.prelude:make-keyword method)
+                                 :parameters (pairs-to-alist qs))
+          (declare (ignorable status-code))
+          (eloquent.mvc.response:respond-json
+           `(("data" . (("content" . ,body)
+                        ("headers" . ,(mapcar #'(lambda (header)
+                                                  `(("field" . ,(car header))
+                                                    ("value" . ,(cdr header))))
+                                              headers))))
+             ("success" . t))))
+      (usocket:timeout-error (e)
+        (eloquent.mvc.response:respond-json
+         `(("error" . ,(format nil "~S" e))
+           ("success" . nil)))))))
 
 (defun sleepy (request)
   "5秒后再响应"
