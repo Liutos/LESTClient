@@ -42,7 +42,8 @@
                     ("headers" . ,(mapcar #'(lambda (header)
                                               `(("field" . ,(car header))
                                                 ("value" . ,(cdr header))))
-                                          headers)))))))))
+                                          headers))))
+         ("success" . t))))))
 
 (defun sleepy (request)
   "5秒后再响应"
