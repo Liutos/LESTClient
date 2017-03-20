@@ -26,11 +26,19 @@
        (header "header")
        (method "method" :requirep t)
        (qs "qs")
+       (timeout "timeout" :type :integer)
        (url "url" :requirep t))
       request
     (eloquent.mvc.response:respond
      (drakma:http-request url
                           :additional-headers (pairs-to-alist header)
+                          :connection-timeout timeout
                           :content body
                           :method (eloquent.mvc.prelude:make-keyword method)
                           :parameters (pairs-to-alist qs)))))
+
+(defun sleepy (request)
+  "5秒后再响应"
+  (declare (ignorable request))
+  (sleep 5)
+  (eloquent.mvc.response:respond "OK"))

@@ -23,6 +23,7 @@ var app = new Vue({
             value: this.queryValue
           },
         ],
+        timeout: this.timeout,
         url: this.url
       }, {
         'Content-Type': 'application/json'

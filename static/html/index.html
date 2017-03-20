@@ -23,6 +23,7 @@
     </ul>
     <textarea v-model="requestBody">
     </textarea>
+    <input placeholder="超时时间" v-model="timeout" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
     <div>
       <pre>{{ response }}</pre>
