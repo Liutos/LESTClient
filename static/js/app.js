@@ -29,7 +29,8 @@ var app = new Vue({
         'Content-Type': 'application/json'
       }).then(response => {
         const body = response.body;
-        this.response = body;
+        const data = body.data;
+        this.response = data.content;
       }, response => {
         this.response = 'FAIL';
       });

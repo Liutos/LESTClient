@@ -29,13 +29,20 @@
        (timeout "timeout" :type :integer)
        (url "url" :requirep t))
       request
-    (eloquent.mvc.response:respond
-     (drakma:http-request url
-                          :additional-headers (pairs-to-alist header)
-                          :connection-timeout timeout
-                          :content body
-                          :method (eloquent.mvc.prelude:make-keyword method)
-                          :parameters (pairs-to-alist qs)))))
+    (multiple-value-bind (body status-code headers)
+        (drakma:http-request url
+                             :additional-headers (pairs-to-alist header)
+                             :connection-timeout timeout
+                             :content body
+                             :method (eloquent.mvc.prelude:make-keyword method)
+                             :parameters (pairs-to-alist qs))
+      (declare (ignorable status-code))
+      (eloquent.mvc.response:respond-json
+       `(("data" . (("content" . ,body)
+                    ("headers" . ,(mapcar #'(lambda (header)
+                                              `(("field" . ,(car header))
+                                                ("value" . ,(cdr header))))
+                                          headers)))))))))
 
 (defun sleepy (request)
   "5秒后再响应"
