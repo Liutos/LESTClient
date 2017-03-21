@@ -38,6 +38,9 @@
                                  :method (eloquent.mvc.prelude:make-keyword method)
                                  :parameters (pairs-to-alist qs))
           (declare (ignorable status-code))
+          (when (typep body '(simple-array (unsigned-byte 8)))
+            (setf body
+                  (flexi-streams:octets-to-string body :external-format :utf8)))
           (eloquent.mvc.response:respond-json
            `(("data" . (("content" . ,body)
                         ("headers" . ,(mapcar #'(lambda (header)
