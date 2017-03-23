@@ -2,6 +2,31 @@
 
 (in-package #:lestclient)
 
+(defun fetch-access-token (code)
+  "Fetch access token for GitHub account by CODE."
+  (check-type code string)
+  (let* ((raw (drakma:http-request "https://github.com/login/oauth/access_token"
+                                   :method :post
+                                   :parameters `(("client_id" . "86c411c375daa46e92de")
+                                                 ("client_secret" . "3dbbaf0b221fea8c0c485b298b6f0946e4ba9940")
+                                                 ("code" . ,code)
+                                                 ("redirect_uri" . "http://localhost:8087/"))))
+         (response (flexi-streams:octets-to-string raw :external-format :utf8)))
+    (let ((alist (eloquent.mvc.prelude:parse-query-string response)))
+      (declare (ignorable alist))
+      (eloquent.mvc.prelude:string-assoc "access_token" alist))))
+
+(defun fetch-user (access-token)
+  "Fetch user's information according to ACCESS-TOKEN."
+  (check-type access-token string)
+  (let* ((raw (drakma:http-request "https://api.github.com/user"
+                                   :parameters `(("access_token" . ,access-token))))
+         (response (flexi-streams:octets-to-string raw :external-format :utf8)))
+    (let* ((cl-json:*identifier-name-to-key* #'identity)
+           (cl-json:*json-identifier-name-to-lisp* #'identity)
+           (user (cl-json:decode-json-from-string response)))
+      user)))
+
 (defun pairs-to-alist (pairs)
   "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in DRAKMA:HTTP-REQUEST"
   (mapcar #'(lambda (pair)
@@ -52,6 +77,18 @@
         (eloquent.mvc.response:respond-json
          `(("error" . ,(format nil "~S" e))
            ("success" . nil)))))))
+
+(defun sign-in (request)
+  (eloquent.mvc.controller:query-string-bind ((code "code"))
+      request
+    (let* ((access-token (fetch-access-token code))
+           (user (fetch-user access-token)))
+      (eloquent.mvc.response:respond
+       ""
+       :headers (list :location
+                      (format nil "http://localhost:8087/?name=~A"
+                              (eloquent.mvc.prelude:string-assoc "name" user)))
+       :status 302))))
 
 (defun sleepy (request)
   "5秒后再响应"
