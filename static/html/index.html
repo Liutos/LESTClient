@@ -26,6 +26,11 @@
     </textarea>
     <input placeholder="超时时间" v-model="timeout" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
+    <ul>
+      <li v-for="header in headers">
+        <span>{{ header.field }}</span> - <span>{{ header.value }}</span>
+      </li>
+    </ul>
     <div>
       <pre>{{ response }}</pre>
     </div>

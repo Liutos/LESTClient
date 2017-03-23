@@ -33,6 +33,7 @@ var app = new Vue({
         const success = body.success;
         if (success) {
           this.response = data.content;
+          this.headers = data.headers;
         } else {
           this.response = body.error;
         }
