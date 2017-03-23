@@ -34,6 +34,14 @@
                     (cdr (second pair))))
           pairs))
 
+(defun save-user (id user)
+  "Save USER owned ID to database."
+  (redis:with-connection (:host "127.0.0.1" :port 6381)
+    (apply #'red:hmset id
+           (alexandria:mappend #'(lambda (pair)
+                                   (list (car pair) (cdr pair)))
+                               user))))
+
 ;;; EXPORT
 
 (defun home (request)
@@ -83,6 +91,7 @@
       request
     (let* ((access-token (fetch-access-token code))
            (user (fetch-user access-token)))
+      (save-user (eloquent.mvc.prelude:string-assoc "id" user) user)
       (eloquent.mvc.response:respond
        ""
        :headers (list :location

@@ -5,7 +5,8 @@
   :description "Simulation of RESTClient, a Firefox plugin."
   :author "Liutos <mat.liutos@gmail.com>"
   :license "MIT"
-  :depends-on (#:drakma
+  :depends-on (#:cl-redis
+               #:drakma
                #:eloquent-mvc)
   :serial t
   :components ((:file "package")
