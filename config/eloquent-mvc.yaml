@@ -2,6 +2,10 @@ application:
   root: <% @var user-homedir-pathname %>src/cl/LESTClient/
 log:
   directory: <% @var user-homedir-pathname %>src/cl/LESTClient/log/
+OAuth:
+  client-id: e3c42c755d989c3d3e26
+  client-secret: c1f394a9093a67e1f99ece6ee5a7d247edf4fd58
+  redirect-uri: http://localhost:8087/
 server:
   port: 8087
   server: hunchentoot

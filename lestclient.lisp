@@ -2,15 +2,14 @@
 
 (in-package #:lestclient)
 
-(defun fetch-access-token (code)
+(defun fetch-access-token (client-id client-secret code)
   "Fetch access token for GitHub account by CODE."
   (check-type code string)
   (let* ((raw (drakma:http-request "https://github.com/login/oauth/access_token"
                                    :method :post
-                                   :parameters `(("client_id" . "86c411c375daa46e92de")
-                                                 ("client_secret" . "3dbbaf0b221fea8c0c485b298b6f0946e4ba9940")
-                                                 ("code" . ,code)
-                                                 ("redirect_uri" . "http://localhost:8087/"))))
+                                   :parameters `(("client_id" . ,client-id)
+                                                 ("client_secret" . ,client-secret)
+                                                 ("code" . ,code))))
          (response (flexi-streams:octets-to-string raw :external-format :utf8)))
     (let ((alist (eloquent.mvc.prelude:parse-query-string response)))
       (declare (ignorable alist))
@@ -90,7 +89,10 @@
 (defun sign-in (request)
   (eloquent.mvc.controller:query-string-bind ((code "code"))
       request
-    (let* ((access-token (fetch-access-token code))
+    (let* ((config eloquent.mvc.config:*config*)
+           (client-id (eloquent.mvc.config:get config "OAuth" "client-id"))
+           (client-secret (eloquent.mvc.config:get config "OAuth" "client-secret"))
+           (access-token (fetch-access-token client-id client-secret code))
            (user (fetch-user access-token)))
       (save-user (eloquent.mvc.prelude:string-assoc "id" user) user)
       (eloquent.mvc.response:respond
