@@ -68,6 +68,7 @@
                                  :additional-headers (pairs-to-alist header)
                                  :connection-timeout timeout
                                  :content body
+                                 :external-format-out :utf8
                                  :method (eloquent.mvc.prelude:make-keyword method)
                                  :parameters (pairs-to-alist qs))
           (declare (ignorable status-code))
