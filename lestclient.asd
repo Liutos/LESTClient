@@ -7,7 +7,8 @@
   :license "MIT"
   :depends-on (#:cl-redis
                #:drakma
-               #:eloquent-mvc)
+               #:eloquent-mvc
+               #:uuid)
   :serial t
   :components ((:file "package")
                (:file "lestclient")))

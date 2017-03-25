@@ -26,6 +26,14 @@
            (user (cl-json:decode-json-from-string response)))
       user)))
 
+(defun make-set-cookies (user)
+  "Creates a Set-Cookie header for USER."
+  (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
+        (max-age (* 1 24 60 60))
+        (session-id (uuid:format-as-urn nil (uuid:make-v4-uuid))))
+    (list (format nil "id=~D; Max-Age=~D" id max-age)
+          (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
+
 (defun pairs-to-alist (pairs)
   "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in DRAKMA:HTTP-REQUEST"
   (mapcar #'(lambda (pair)
@@ -103,12 +111,16 @@
            (access-token (fetch-access-token client-id client-secret code))
            (user (fetch-user access-token)))
       (save-user (eloquent.mvc.prelude:string-assoc "id" user) user)
-      (eloquent.mvc.response:respond
-       ""
-       :headers (list :location
-                      (format nil "http://localhost:8087/?name=~A"
-                              (eloquent.mvc.prelude:string-assoc "name" user)))
-       :status 302))))
+      (let ((set-cookies (make-set-cookies user)))
+        (eloquent.mvc.response:respond
+         ""
+         :headers `(:location
+                    ,(format nil "http://localhost:8087/?name=~A"
+                             (eloquent.mvc.prelude:string-assoc "name" user))
+                    ,@(alexandria:mappend #'(lambda (set-cookie)
+                                              (list :set-cookie set-cookie))
+                                          set-cookies))
+         :status 302)))))
 
 (defun sleepy (request)
   "5秒后再响应"
