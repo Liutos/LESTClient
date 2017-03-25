@@ -31,8 +31,8 @@
   (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
         (max-age (* 1 24 60 60))
         (session-id (uuid:format-as-urn nil (uuid:make-v4-uuid))))
-    (list (format nil "id=~D; Max-Age=~D" id max-age)
-          (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
+    (list :set-cookie (format nil "user-id=~D; Max-Age=~D" id max-age)
+          :set-cookie (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
 
 (defun pairs-to-alist (pairs)
   "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in DRAKMA:HTTP-REQUEST"
@@ -117,9 +117,7 @@
          :headers `(:location
                     ,(format nil "http://localhost:8087/?name=~A"
                              (eloquent.mvc.prelude:string-assoc "name" user))
-                    ,@(alexandria:mappend #'(lambda (set-cookie)
-                                              (list :set-cookie set-cookie))
-                                          set-cookies))
+                    ,@set-cookies)
          :status 302)))))
 
 (defun sleepy (request)
