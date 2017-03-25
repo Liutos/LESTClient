@@ -82,7 +82,8 @@
   "Get the client ID for OAuth"
   (let ((config eloquent.mvc.config:*config*))
     (eloquent.mvc.response:respond-json
-     `(("data" . (("client-id" . ,(eloquent.mvc.config:get config "OAuth" "client-id"))))
+     `(("data" . (("client-id" . ,(eloquent.mvc.config:get config "OAuth" "client-id"))
+                  ("sign-in-uri" . ,(eloquent.mvc.config:get config "OAuth" "sign-in-uri"))))
        ("success" . t)))))
 
 (defun home (request)

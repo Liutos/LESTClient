@@ -1,3 +1,22 @@
+Vue.component('oauth', function (resolve, reject) {
+  Vue.http.get('/api/client_id')
+    .then(response => {
+      const body = response.body;
+      const data = body.data;
+      const success = body.success;
+      if (success) {
+        const oauthUri = 'https://github.com/login/oauth/authorize?client_id=' + data['client-id'] + '&redirect_uri=' + encodeURIComponent(data['sign-in-uri']);
+        resolve({
+          template: '<a href="' + oauthUri + '">以GitHub帐号登录</a>'
+        });
+      } else {
+        reject('获取client ID失败');
+      }
+    }, response => {
+      reject('获取client ID失败');
+    });
+});
+
 var app = new Vue({
   el: '#app',
   data: {
