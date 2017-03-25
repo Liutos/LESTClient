@@ -43,14 +43,6 @@
 
 ;;; EXPORT
 
-(defun home (request)
-  "响应首页内容"
-  (declare (ignorable request))
-  (let* ((config eloquent.mvc.config:*config*)
-         (root (eloquent.mvc.config:get-application-root config))
-         (home-page (merge-pathnames "static/html/index.html" root)))
-    (eloquent.mvc.response:respond home-page)))
-
 (defun api-request (request)
   "请求目标接口"
   (eloquent.mvc.controller:json-body-bind
@@ -85,6 +77,21 @@
         (eloquent.mvc.response:respond-json
          `(("error" . ,(format nil "~S" e))
            ("success" . nil)))))))
+
+(defun get-client-id ()
+  "Get the client ID for OAuth"
+  (let ((config eloquent.mvc.config:*config*))
+    (eloquent.mvc.response:respond-json
+     `(("data" . (("client-id" . ,(eloquent.mvc.config:get config "OAuth" "client-id"))))
+       ("success" . t)))))
+
+(defun home (request)
+  "响应首页内容"
+  (declare (ignorable request))
+  (let* ((config eloquent.mvc.config:*config*)
+         (root (eloquent.mvc.config:get-application-root config))
+         (home-page (merge-pathnames "static/html/index.html" root)))
+    (eloquent.mvc.response:respond home-page)))
 
 (defun sign-in (request)
   (eloquent.mvc.controller:query-string-bind ((code "code"))
