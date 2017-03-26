@@ -86,6 +86,18 @@
          `(("error" . ,(format nil "~S" e))
            ("success" . nil)))))))
 
+(defun check-authentication (request next &key)
+  "The request to any API except home page and sign in page must be authenticated."
+  (let ((path-info (eloquent.mvc.request:request-path-info request)))
+    ;; Check the Cookie HTTP header
+    (when (or (string/= path-info "/")
+              (string/= path-info "/sign_in"))
+      (let ((session-id (eloquent.mvc.request:get-cookie request "session-id"))
+            (user-id (eloquent.mvc.request:get-cookie request "user-id")))
+        (format t "session-id is ~S~%" session-id)
+        (format t "user-id is ~S~%" user-id)))
+    (funcall next request)))
+
 (defun get-client-id ()
   "Get the client ID for OAuth"
   (let ((config eloquent.mvc.config:*config*))

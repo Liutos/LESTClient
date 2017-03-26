@@ -1,5 +1,6 @@
 ;;;; package.lisp
 
 (defpackage #:lestclient
-  (:use #:cl))
+  (:use #:cl)
+  (:export #:check-authentication))
 

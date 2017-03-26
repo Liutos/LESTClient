@@ -4,4 +4,5 @@
  eloquent.mvc.middleware:static-file
  eloquent.mvc.middleware:not-found
  eloquent.mvc.middleware:parse-body
- eloquent.mvc.middleware:fill-template)
+ eloquent.mvc.middleware:fill-template
+ lestclient:check-authentication)
