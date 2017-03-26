@@ -142,7 +142,7 @@
         (eloquent.mvc.response:respond
          ""
          :headers `(:location
-                    ,(format nil "http://localhost:8087/?name=~A"
+                    ,(format nil "/?name=~A"
                              (eloquent.mvc.prelude:string-assoc "name" user))
                     ,@set-cookies)
          :status 302)))))
