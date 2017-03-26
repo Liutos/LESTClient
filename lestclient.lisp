@@ -101,6 +101,10 @@
             (user-id (eloquent.mvc.request:get-cookie request "user-id")))
         (format t "session-id is ~S~%" session-id)
         (format t "user-id is ~S~%" user-id)
+        (when (or (null session-id) (null user-id))
+          (error 'eloquent.mvc.response:http-compatible-error
+                 :message "请先登录"
+                 :status 401))
         (redis:with-connection (:port 6381)
           (let ((user-id-stored (red:get session-id)))
             (when (string/= user-id user-id-stored)
