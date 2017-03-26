@@ -93,12 +93,20 @@
   "The request to any API except home page and sign in page must be authenticated."
   (let ((path-info (eloquent.mvc.request:request-path-info request)))
     ;; Check the Cookie HTTP header
-    (when (or (string/= path-info "/")
-              (string/= path-info "/sign_in"))
+    (format t "path-info is ~S~%" path-info)
+    (when (and (string/= path-info "/")
+               (string/= path-info "/api/client_id")
+               (string/= path-info "/sign_in"))
       (let ((session-id (eloquent.mvc.request:get-cookie request "session-id"))
             (user-id (eloquent.mvc.request:get-cookie request "user-id")))
         (format t "session-id is ~S~%" session-id)
-        (format t "user-id is ~S~%" user-id)))
+        (format t "user-id is ~S~%" user-id)
+        (redis:with-connection (:port 6381)
+          (let ((user-id-stored (red:get session-id)))
+            (when (string/= user-id user-id-stored)
+              (error 'eloquent.mvc.response:http-compatible-error
+                     :message "请先登录"
+                     :status 401))))))
     (funcall next request)))
 
 (defun get-client-id ()
