@@ -31,6 +31,9 @@
   (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
         (max-age (* 1 24 60 60))
         (session-id (uuid:format-as-urn nil (uuid:make-v4-uuid))))
+    (redis:with-connection (:port 6381)
+      (red:set session-id id)
+      (red:expire session-id max-age))
     (list :set-cookie (format nil "user-id=~D; Max-Age=~D" id max-age)
           :set-cookie (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
 
