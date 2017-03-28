@@ -54,6 +54,7 @@ var app = new Vue({
           this.response = data.content;
           this.headers = data.headers;
           this.status_code = data['status-code'];
+          this.total_time = data['total-time'];
         } else {
           this.response = body.error;
         }
