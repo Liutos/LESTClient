@@ -53,6 +53,7 @@ var app = new Vue({
         if (success) {
           this.response = data.content;
           this.headers = data.headers;
+          this.status_code = data['status-code'];
         } else {
           this.response = body.error;
         }

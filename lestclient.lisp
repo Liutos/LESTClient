@@ -85,7 +85,8 @@
                         ("headers" . ,(mapcar #'(lambda (header)
                                                   `(("field" . ,(car header))
                                                     ("value" . ,(cdr header))))
-                                              headers))))
+                                              headers))
+                        ("status-code" . ,status-code)))
              ("success" . t))))
       (usocket:timeout-error (e)
         (eloquent.mvc.response:respond-json
