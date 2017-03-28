@@ -71,23 +71,26 @@
        (url "url" :requirep t))
       request
     (handler-case
-        (multiple-value-bind (body status-code headers)
-            (http-request url
-                          :additional-headers (pairs-to-alist header)
-                          :connection-timeout timeout
-                          :content body
-                          :external-format-out :utf8
-                          :method (eloquent.mvc.prelude:make-keyword method)
-                          :parameters (pairs-to-alist qs))
-          (declare (ignorable status-code))
-          (eloquent.mvc.response:respond-json
-           `(("data" . (("content" . ,body)
-                        ("headers" . ,(mapcar #'(lambda (header)
-                                                  `(("field" . ,(car header))
-                                                    ("value" . ,(cdr header))))
-                                              headers))
-                        ("status-code" . ,status-code)))
-             ("success" . t))))
+        (let ((request-before (get-universal-time))
+              request-after)
+          (multiple-value-bind (body status-code headers)
+              (http-request url
+                            :additional-headers (pairs-to-alist header)
+                            :connection-timeout timeout
+                            :content body
+                            :external-format-out :utf8
+                            :method (eloquent.mvc.prelude:make-keyword method)
+                            :parameters (pairs-to-alist qs))
+            (setf request-after (get-universal-time))
+            (eloquent.mvc.response:respond-json
+             `(("data" . (("content" . ,body)
+                          ("headers" . ,(mapcar #'(lambda (header)
+                                                    `(("field" . ,(car header))
+                                                      ("value" . ,(cdr header))))
+                                                headers))
+                          ("status-code" . ,status-code)
+                          ("total-time" . ,(- request-after request-before))))
+               ("success" . t)))))
       (usocket:timeout-error (e)
         (eloquent.mvc.response:respond-json
          `(("error" . ,(format nil "~S" e))
@@ -97,14 +100,11 @@
   "The request to any API except home page and sign in page must be authenticated."
   (let ((path-info (eloquent.mvc.request:request-path-info request)))
     ;; Check the Cookie HTTP header
-    (format t "path-info is ~S~%" path-info)
     (when (and (string/= path-info "/")
                (string/= path-info "/api/client_id")
                (string/= path-info "/sign_in"))
       (let ((session-id (eloquent.mvc.request:get-cookie request "session-id"))
             (user-id (eloquent.mvc.request:get-cookie request "user-id")))
-        (format t "session-id is ~S~%" session-id)
-        (format t "user-id is ~S~%" user-id)
         (when (or (null session-id) (null user-id))
           (error 'eloquent.mvc.response:http-compatible-error
                  :message "请先登录"
