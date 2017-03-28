@@ -5,12 +5,11 @@
 (defun fetch-access-token (client-id client-secret code)
   "Fetch access token for GitHub account by CODE."
   (check-type code string)
-  (let* ((raw (drakma:http-request "https://github.com/login/oauth/access_token"
-                                   :method :post
-                                   :parameters `(("client_id" . ,client-id)
-                                                 ("client_secret" . ,client-secret)
-                                                 ("code" . ,code))))
-         (response (flexi-streams:octets-to-string raw :external-format :utf8)))
+  (let* ((response (http-request "https://github.com/login/oauth/access_token"
+                                 :method :post
+                                 :parameters `(("client_id" . ,client-id)
+                                               ("client_secret" . ,client-secret)
+                                               ("code" . ,code)))))
     (let ((alist (eloquent.mvc.prelude:parse-query-string response)))
       (declare (ignorable alist))
       (eloquent.mvc.prelude:string-assoc "access_token" alist))))
@@ -18,9 +17,8 @@
 (defun fetch-user (access-token)
   "Fetch user's information according to ACCESS-TOKEN."
   (check-type access-token string)
-  (let* ((raw (drakma:http-request "https://api.github.com/user"
-                                   :parameters `(("access_token" . ,access-token))))
-         (response (flexi-streams:octets-to-string raw :external-format :utf8)))
+  (let* ((response (http-request "https://api.github.com/user"
+                                 :parameters `(("access_token" . ,access-token)))))
     (let* ((cl-json:*identifier-name-to-key* #'identity)
            (cl-json:*json-identifier-name-to-lisp* #'identity)
            (user (cl-json:decode-json-from-string response)))
@@ -38,7 +36,7 @@
           :set-cookie (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
 
 (defun pairs-to-alist (pairs)
-  "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in DRAKMA:HTTP-REQUEST"
+  "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in HTTP-REQUEST"
   (mapcar #'(lambda (pair)
               (cons (cdr (first pair))
                     (cdr (second pair))))
@@ -66,17 +64,14 @@
       request
     (handler-case
         (multiple-value-bind (body status-code headers)
-            (drakma:http-request url
-                                 :additional-headers (pairs-to-alist header)
-                                 :connection-timeout timeout
-                                 :content body
-                                 :external-format-out :utf8
-                                 :method (eloquent.mvc.prelude:make-keyword method)
-                                 :parameters (pairs-to-alist qs))
+            (http-request url
+                          :additional-headers (pairs-to-alist header)
+                          :connection-timeout timeout
+                          :content body
+                          :external-format-out :utf8
+                          :method (eloquent.mvc.prelude:make-keyword method)
+                          :parameters (pairs-to-alist qs))
           (declare (ignorable status-code))
-          (when (typep body '(simple-array (unsigned-byte 8)))
-            (setf body
-                  (flexi-streams:octets-to-string body :external-format :utf8)))
           (eloquent.mvc.response:respond-json
            `(("data" . (("content" . ,body)
                         ("headers" . ,(mapcar #'(lambda (header)

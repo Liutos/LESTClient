@@ -11,5 +11,6 @@
                #:uuid)
   :serial t
   :components ((:file "package")
+               (:file "http_client")
                (:file "lestclient")))
 
