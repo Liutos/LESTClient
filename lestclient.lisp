@@ -2,6 +2,14 @@
 
 (in-package #:lestclient)
 
+(defun create-token ()
+  "Creates a token for authorization when requesting /api/request."
+  (let ((token (uuid:format-as-urn nil (uuid:make-v4-uuid))))
+    (redis:with-connection (:port 6381)
+      (red:set token token)
+      (red:expire token (* 24 60 60)))
+    token))
+
 (defun fetch-access-token (client-id client-secret code)
   "Fetch access token for GitHub account by CODE."
   (check-type code string)
