@@ -124,6 +124,13 @@
                   ("sign-in-uri" . ,(eloquent.mvc.config:get config "OAuth" "sign-in-uri"))))
        ("success" . t)))))
 
+(defun get-request-token ()
+  "Get a token for future requesting to /api/request."
+  (let ((token (create-token)))
+    (eloquent.mvc.response:respond-json
+     `(("data" . (("token" . ,token)))
+       ("success" . t)))))
+
 (defun home (request)
   "响应首页内容"
   (declare (ignorable request))
