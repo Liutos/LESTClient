@@ -32,6 +32,13 @@
            (user (cl-json:decode-json-from-string response)))
       user)))
 
+(defun make-headers (headers)
+  "Converts field names in HEADERS to capital case style."
+  (mapcar #'(lambda (header)
+              `(("field" . ,(string-capitalize (car header)))
+                ("value" . ,(cdr header))))
+          headers))
+
 (defun make-set-cookies (user)
   "Creates a Set-Cookie header for USER."
   (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
@@ -91,10 +98,7 @@
             (setf request-after (get-universal-time))
             (eloquent.mvc.response:respond-json
              `(("data" . (("content" . ,body)
-                          ("headers" . ,(mapcar #'(lambda (header)
-                                                    `(("field" . ,(car header))
-                                                      ("value" . ,(cdr header))))
-                                                headers))
+                          ("headers" . ,(make-headers headers))
                           ("status-code" . ,status-code)
                           ("token" . ,next-token)
                           ("total-time" . ,(- request-after request-before))))
