@@ -68,8 +68,14 @@
        (method "method" :requirep t)
        (qs "qs")
        (timeout "timeout" :type :integer)
+       (token "token")
        (url "url" :requirep t))
       request
+    (redis:with-connection (:port 6381)
+      (when (zerop (red:del token))
+        (error 'eloquent.mvc.response:http-compatible-error
+               :message "无效请求"
+               :status 403)))
     (handler-case
         (let ((request-before (get-universal-time))
               request-after)
