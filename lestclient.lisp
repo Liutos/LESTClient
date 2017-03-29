@@ -77,7 +77,8 @@
                :message "无效请求"
                :status 403)))
     (handler-case
-        (let ((request-before (get-universal-time))
+        (let ((next-token (create-token))
+              (request-before (get-universal-time))
               request-after)
           (multiple-value-bind (body status-code headers)
               (http-request url
@@ -95,6 +96,7 @@
                                                       ("value" . ,(cdr header))))
                                                 headers))
                           ("status-code" . ,status-code)
+                          ("token" . ,next-token)
                           ("total-time" . ,(- request-after request-before))))
                ("success" . t)))))
       (usocket:timeout-error (e)

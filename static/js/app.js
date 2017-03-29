@@ -64,6 +64,7 @@ var app = new Vue({
           },
         ],
         timeout: this.timeout,
+        token,
         url: this.url
       }, {
         'Content-Type': 'application/json'
@@ -75,6 +76,7 @@ var app = new Vue({
           this.response = data.content;
           this.headers = data.headers;
           this.status_code = data['status-code'];
+          token = data.token;
           this.total_time = data['total-time'];
         } else {
           this.response = body.error;
