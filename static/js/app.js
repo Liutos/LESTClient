@@ -17,6 +17,27 @@ Vue.component('oauth', function (resolve, reject) {
     });
 });
 
+var token = null;
+
+Vue.component('request-token', function (resolve, reject) {
+  Vue.http.get('/api/request_token')
+    .then(response => {
+      const body = response.body;
+      const data = body.data;
+      const success = body.success;
+      if (success) {
+        token = data['token'];
+        resolve({
+          template: '<div>' + token + '</div>'
+        });
+      } else {
+        reject('获取client ID失败');
+      }
+    }, response => {
+      reject('获取request token失败');
+    });
+});
+
 var app = new Vue({
   el: '#app',
   data: {
