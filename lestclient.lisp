@@ -144,6 +144,19 @@
      `(("data" . (("token" . ,token)))
        ("success" . t)))))
 
+(defun get-user (request)
+  "Get the user's information saved when signed in."
+  (let ((user-id (eloquent.mvc.request:get-cookie request "user-id")))
+    (redis:with-connection (:port 6381)
+      (let* ((keys (red:hkeys user-id))
+             (user (mapcar #'(lambda (key)
+                               (let ((value (red:hget user-id key)))
+                                 (cons key value)))
+                           keys)))
+        (eloquent.mvc.response:respond-json
+         `(("data" . (("user" . ,user)))
+           ("success" . t)))))))
+
 (defun home (request)
   "响应首页内容"
   (declare (ignorable request))
