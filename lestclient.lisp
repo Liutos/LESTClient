@@ -85,7 +85,7 @@
                :status 403)))
     (handler-case
         (let ((next-token (create-token))
-              (request-before (get-universal-time))
+              (request-before (eloquent.mvc.prelude:now :millisecond))
               request-after)
           (multiple-value-bind (body status-code headers)
               (http-request url
@@ -95,7 +95,7 @@
                             :external-format-out :utf8
                             :method (eloquent.mvc.prelude:make-keyword method)
                             :parameters (pairs-to-alist qs))
-            (setf request-after (get-universal-time))
+            (setf request-after (eloquent.mvc.prelude:now :millisecond))
             (eloquent.mvc.response:respond-json
              `(("data" . (("content" . ,body)
                           ("headers" . ,(make-headers headers))
