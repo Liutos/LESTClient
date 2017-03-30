@@ -31,10 +31,35 @@ Vue.component('request-token', function (resolve, reject) {
           template: '<div>' + token + '</div>'
         });
       } else {
-        reject('获取client ID失败');
+        reject('获取request token失败');
       }
     }, response => {
       reject('获取request token失败');
+    });
+});
+
+Vue.component('user', function (resolve, reject) {
+  Vue.http.get('/api/user')
+    .then(response => {
+      const body = response.body;
+      const data = body.data;
+      const success = body.success;
+      if (success) {
+        const user = data.user;
+        resolve({
+          data: function () {
+            return {
+              avatar_url: user.avatar_url,
+              login: user.login
+            };
+          },
+          template: '<div><span>{{ login }}</span><img v-bind:src="avatar_url"></img></div>'
+        });
+      } else {
+        reject('获取用户信息失败');
+      }
+    }, response => {
+      reject('获取用户信息失败');
     });
 });
 
