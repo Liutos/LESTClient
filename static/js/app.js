@@ -41,6 +41,8 @@ Vue.component('request-token', function (resolve, reject) {
 var app = new Vue({
   el: '#app',
   data: {
+    headerKeys: [],
+    headerValues: [],
     method: 'GET',
     url: 'http://example.com',
     response: 'Here comes response',
@@ -48,14 +50,15 @@ var app = new Vue({
   },
   methods: {
     echoMessage: function () {
+      const header = this.headerKeys.map((e, i) => {
+        return {
+          key: e,
+          value: this.headerValues[i]
+        };
+      });
       Vue.http.post('/api/request', {
         body: this.requestBody,
-        header: [
-          {
-            key: this.headerKey,
-            value: this.headerValue
-          }
-        ],
+        header,
         method: this.method,
         qs: [
           {
