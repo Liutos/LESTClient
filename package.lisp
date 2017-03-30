@@ -2,5 +2,6 @@
 
 (defpackage #:lestclient
   (:use #:cl)
-  (:export #:check-authentication))
+  (:export #:connect-to-redis
+           #:check-authentication))
 

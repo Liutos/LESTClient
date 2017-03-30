@@ -7,6 +7,8 @@ OAuth:
   client-secret: c1f394a9093a67e1f99ece6ee5a7d247edf4fd58
   redirect-uri: http://localhost:8087/
   sign-in-uri: http://localhost:8087/sign_in
+redis:
+  port: 6381
 server:
   port: 8087
   server: hunchentoot

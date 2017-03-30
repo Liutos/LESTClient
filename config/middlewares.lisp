@@ -5,4 +5,5 @@
  eloquent.mvc.middleware:not-found
  eloquent.mvc.middleware:parse-body
  eloquent.mvc.middleware:fill-template
+ lestclient:connect-to-redis
  lestclient:check-authentication)

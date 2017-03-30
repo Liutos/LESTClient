@@ -5,9 +5,8 @@
 (defun create-token ()
   "Creates a token for authorization when requesting /api/request."
   (let ((token (uuid:format-as-urn nil (uuid:make-v4-uuid))))
-    (redis:with-connection (:port 6381)
-      (red:set token token)
-      (red:expire token (* 24 60 60)))
+    (red:set token token)
+    (red:expire token (* 24 60 60))
     token))
 
 (defun fetch-access-token (client-id client-secret code)
@@ -44,9 +43,8 @@
   (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
         (max-age (* 1 24 60 60))
         (session-id (uuid:format-as-urn nil (uuid:make-v4-uuid))))
-    (redis:with-connection (:port 6381)
-      (red:set session-id id)
-      (red:expire session-id max-age))
+    (red:set session-id id)
+    (red:expire session-id max-age)
     (list :set-cookie (format nil "user-id=~D; Max-Age=~D" id max-age)
           :set-cookie (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
 
@@ -59,11 +57,10 @@
 
 (defun save-user (id user)
   "Save USER owned ID to database."
-  (redis:with-connection (:host "127.0.0.1" :port 6381)
-    (apply #'red:hmset id
-           (alexandria:mappend #'(lambda (pair)
-                                   (list (car pair) (cdr pair)))
-                               user))))
+  (apply #'red:hmset id
+         (alexandria:mappend #'(lambda (pair)
+                                 (list (car pair) (cdr pair)))
+                             user)))
 
 ;;; EXPORT
 
@@ -78,11 +75,10 @@
        (token "token")
        (url "url" :requirep t))
       request
-    (redis:with-connection (:port 6381)
-      (when (zerop (red:del token))
-        (error 'eloquent.mvc.response:http-compatible-error
-               :message "无效请求"
-               :status 403)))
+    (when (zerop (red:del token))
+      (error 'eloquent.mvc.response:http-compatible-error
+             :message "无效请求"
+             :status 403))
     (handler-case
         (let ((next-token (create-token))
               (request-before (eloquent.mvc.prelude:now :millisecond))
@@ -121,12 +117,16 @@
           (error 'eloquent.mvc.response:http-compatible-error
                  :message "请先登录"
                  :status 401))
-        (redis:with-connection (:port 6381)
-          (let ((user-id-stored (red:get session-id)))
-            (when (string/= user-id user-id-stored)
-              (error 'eloquent.mvc.response:http-compatible-error
-                     :message "请先登录"
-                     :status 401))))))
+        (let ((user-id-stored (red:get session-id)))
+          (when (string/= user-id user-id-stored)
+            (error 'eloquent.mvc.response:http-compatible-error
+                   :message "请先登录"
+                   :status 401)))))
+    (funcall next request)))
+
+(defun connect-to-redis (request next &key config)
+  "Prepare to connect to redis."
+  (redis:with-connection (:port (eloquent.mvc.config:get config "redis" "port"))
     (funcall next request)))
 
 (defun get-client-id ()
@@ -147,15 +147,14 @@
 (defun get-user (request)
   "Get the user's information saved when signed in."
   (let ((user-id (eloquent.mvc.request:get-cookie request "user-id")))
-    (redis:with-connection (:port 6381)
-      (let* ((keys (red:hkeys user-id))
-             (user (mapcar #'(lambda (key)
-                               (let ((value (red:hget user-id key)))
-                                 (cons key value)))
-                           keys)))
-        (eloquent.mvc.response:respond-json
-         `(("data" . (("user" . ,user)))
-           ("success" . t)))))))
+    (let* ((keys (red:hkeys user-id))
+           (user (mapcar #'(lambda (key)
+                             (let ((value (red:hget user-id key)))
+                               (cons key value)))
+                         keys)))
+      (eloquent.mvc.response:respond-json
+       `(("data" . (("user" . ,user)))
+         ("success" . t))))))
 
 (defun home (request)
   "响应首页内容"
