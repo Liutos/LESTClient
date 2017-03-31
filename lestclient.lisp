@@ -62,6 +62,13 @@
                                  (list (car pair) (cdr pair)))
                              user)))
 
+(defun uri-to-ip (uri)
+  "Lookup the DNS for resolving the IP address of host in URI."
+  (let* ((uri (puri:parse-uri uri))
+         (host (puri:uri-host uri))
+         (ip-address (iolib:lookup-hostname host)))
+    (format nil "~A"  ip-address)))
+
 ;;; EXPORT
 
 (defun api-request (request)
@@ -80,7 +87,8 @@
              :message "无效请求"
              :status 403))
     (handler-case
-        (let ((next-token (create-token))
+        (let ((ip-address (uri-to-ip url))
+              (next-token (create-token))
               (request-before (eloquent.mvc.prelude:now :millisecond))
               request-after)
           (multiple-value-bind (body status-code headers)
@@ -95,6 +103,7 @@
             (eloquent.mvc.response:respond-json
              `(("data" . (("content" . ,body)
                           ("headers" . ,(make-headers headers))
+                          ("ip-address" . ,ip-address)
                           ("status-code" . ,status-code)
                           ("token" . ,next-token)
                           ("total-time" . ,(- request-after request-before))))

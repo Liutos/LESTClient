@@ -8,6 +8,8 @@
   :depends-on (#:cl-redis
                #:drakma
                #:eloquent-mvc
+               #:iolib
+               #:puri
                #:uuid)
   :serial t
   :components ((:file "package")
