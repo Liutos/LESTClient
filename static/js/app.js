@@ -105,6 +105,7 @@ var app = new Vue({
           this.headers = data.headers;
           this.status_code = data['status-code'];
           token = data.token;
+          this.ip_address = data['ip-address'];
           this.total_time = data['total-time'];
         } else {
           this.response = body.error;

@@ -31,6 +31,7 @@
     <input type="submit" v-on:click="echoMessage" value="请求" />
     <p>{{ status_code }}</p>
     <span>total-time</span> - <span>{{ total_time }}</span>
+    <span>ip-address</span> - <span>{{ ip_address }}</span>
     <ul>
       <li v-for="header in headers">
         <span>{{ header.field }}</span> - <span>{{ header.value }}</span>
