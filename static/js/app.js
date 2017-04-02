@@ -66,24 +66,28 @@ Vue.component('user', function (resolve, reject) {
 var app = new Vue({
   el: '#app',
   data: {
-    headerKeys: [],
-    headerValues: [],
+    requestHeaders: [
+      {
+        key: '',
+        value: ''
+      }
+    ],
     method: 'GET',
     url: 'http://example.com',
     response: 'Here comes response',
     requestBody: 'Content for test'
   },
   methods: {
-    echoMessage: function () {
-      const header = this.headerKeys.map((e, i) => {
-        return {
-          key: e,
-          value: this.headerValues[i]
-        };
+    addRequestHeader: function () {
+      this.requestHeaders.push({
+        key: '',
+        value: ''
       });
+    },
+    echoMessage: function () {
       Vue.http.post('/api/request', {
         body: this.requestBody,
-        header,
+        header: this.requestHeaders,
         method: this.method,
         qs: [
           {
