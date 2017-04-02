@@ -17,9 +17,13 @@
                                  :parameters `(("client_id" . ,client-id)
                                                ("client_secret" . ,client-secret)
                                                ("code" . ,code)))))
-    (let ((alist (eloquent.mvc.prelude:parse-query-string response)))
-      (declare (ignorable alist))
-      (eloquent.mvc.prelude:string-assoc "access_token" alist))))
+    (let* ((alist (eloquent.mvc.prelude:parse-query-string response))
+           (access-token (eloquent.mvc.prelude:string-assoc "access_token" alist)))
+      (unless access-token
+        (error 'eloquent.mvc.response:http-compatible-error
+               :message "获取access_token失败"
+               :status 400))
+      access-token)))
 
 (defun fetch-user (access-token)
   "Fetch user's information according to ACCESS-TOKEN."
