@@ -7,7 +7,12 @@ Vue.component('oauth', function (resolve, reject) {
       if (success) {
         const oauthUri = 'https://github.com/login/oauth/authorize?client_id=' + data['client-id'] + '&redirect_uri=' + encodeURIComponent(data['sign-in-uri']);
         resolve({
-          template: '<a href="' + oauthUri + '">以GitHub帐号登录</a>'
+          data: function () {
+            return {
+              oauthUri
+            };
+          },
+          template: '<li><a v-bind:href="oauthUri">以GitHub帐号登录</a></li>'
         });
       } else {
         reject('获取client ID失败');
@@ -28,7 +33,12 @@ Vue.component('request-token', function (resolve, reject) {
       if (success) {
         token = data['token'];
         resolve({
-          template: '<div>' + token + '</div>'
+          data: function () {
+            return {
+              token
+            };
+          },
+          template: '<li><a href="#">{{ token }}</a></li>'
         });
       } else {
         reject('获取request token失败');
