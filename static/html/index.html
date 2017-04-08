@@ -49,9 +49,14 @@
     </textarea>
     <input placeholder="超时时间" v-model="timeout" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
-    <p>{{ status_code }}</p>
-    <span>total-time</span> - <span>{{ total_time }}</span>
-    <span>ip-address</span> - <span>{{ ip_address }}</span>
+    <div class="panel panel-default">
+      <div class="panel-heading">杂项</div>
+      <table class="table">
+        <tr><td>状态码</td><td>{{ status_code }}</td></tr>
+        <tr><td>总耗时</td><td>{{ total_time }}</td></tr>
+        <tr><td>IP地址</td><td>{{ ip_address }}</td></tr>
+      </table>
+    </div>
     <ul>
       <li v-for="header in headers">
         <span>{{ header.field }}</span> - <span>{{ header.value }}</span>
