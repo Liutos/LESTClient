@@ -49,6 +49,7 @@
     </textarea>
     <input placeholder="超时时间" v-model="timeout" />
     <input type="submit" v-on:click="echoMessage" value="请求" />
+    <span>{{ requestStage }}</span>
     <div class="panel panel-default">
       <div class="panel-heading">杂项</div>
       <table class="table">

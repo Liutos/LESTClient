@@ -85,7 +85,8 @@ var app = new Vue({
     method: 'GET',
     url: 'http://example.com',
     response: 'Here comes response',
-    requestBody: 'Content for test'
+    requestBody: 'Content for test',
+    requestStage: '就绪'
   },
   methods: {
     addRequestHeader: function () {
@@ -95,6 +96,7 @@ var app = new Vue({
       });
     },
     echoMessage: function () {
+      this.requestStage = '请求中';
       Vue.http.post('/api/request', {
         body: this.requestBody,
         header: this.requestHeaders,
@@ -121,11 +123,14 @@ var app = new Vue({
           token = data.token;
           this.ip_address = data['ip-address'];
           this.total_time = data['total-time'];
+          this.requestStage = '成功';
         } else {
           this.response = body.error;
+          this.requestStage = body.error;
         }
       }, response => {
         this.response = 'FAIL';
+        this.requestStage = '失败';
       });
     }
   }
