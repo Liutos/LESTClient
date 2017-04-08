@@ -73,9 +73,10 @@
 (defun uri-to-ip (uri)
   "Lookup the DNS for resolving the IP address of host in URI."
   (let* ((uri (puri:parse-uri uri))
-         (host (puri:uri-host uri))
-         (ip-address (iolib:lookup-hostname host)))
-    (format nil "~A"  ip-address)))
+         (host (puri:uri-host uri)))
+    (if (cl-ppcre:scan "\\d+\\.\\d+\\.\\d+\\.\\d" host)
+        host
+        (format nil "~A"  (iolib:lookup-hostname host)))))
 
 ;;; EXPORT
 
