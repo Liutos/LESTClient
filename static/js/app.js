@@ -63,7 +63,7 @@ Vue.component('user', function (resolve, reject) {
               login: user.login
             };
           },
-          template: '<div><span>{{ login }}</span><img v-bind:src="avatar_url"></img></div>'
+          template: '<li><a><img v-bind:alt="login" height="20" v-bind:src="avatar_url" width="20"></img></a></li>'
         });
       } else {
         reject('获取用户信息失败');
