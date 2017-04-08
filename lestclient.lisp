@@ -54,10 +54,14 @@
 
 (defun pairs-to-alist (pairs)
   "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in HTTP-REQUEST"
-  (mapcar #'(lambda (pair)
-              (cons (cdr (first pair))
-                    (cdr (second pair))))
-          pairs))
+  (let ((filtered (remove-if #'(lambda (pair)
+                                 (let ((key (cdr (first pair))))
+                                   (string= key "")))
+                             pairs)))
+    (mapcar #'(lambda (pair)
+                (cons (cdr (first pair))
+                      (cdr (second pair))))
+            filtered)))
 
 (defun save-user (id user)
   "Save USER owned ID to database."
@@ -98,8 +102,8 @@
           (multiple-value-bind (body status-code headers)
               (http-request url
                             :additional-headers (pairs-to-alist header)
-                            :connection-timeout timeout
-                            :content body
+                            :connection-timeout (or timeout (values))
+                            :content (if (string= body "") nil body)
                             :external-format-out :utf8
                             :method (eloquent.mvc.prelude:make-keyword method)
                             :parameters (pairs-to-alist qs))
