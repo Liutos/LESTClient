@@ -129,7 +129,7 @@ var app = new Vue({
           this.requestStage = body.error;
         }
       }, response => {
-        this.response = 'FAIL';
+        this.response = response.statusText;
         this.requestStage = '失败';
       });
     }
