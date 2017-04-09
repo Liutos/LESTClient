@@ -63,11 +63,14 @@
         <tr><td>IP地址</td><td>{{ ip_address }}</td></tr>
       </table>
     </div>
-    <ul>
-      <li v-for="header in headers">
-        <span>{{ header.field }}</span> - <span>{{ header.value }}</span>
-      </li>
-    </ul>
+    <div class="panel panel-default">
+      <div class="panel-heading">接口响应头部</div>
+      <table class="table">
+        <tr v-for="header in headers">
+          <td>{{ header.field }}</td><td>{{ header.value }}</td>
+        </tr>
+      </table>
+    </div>
     <div>
       <pre>{{ response }}</pre>
     </div>
