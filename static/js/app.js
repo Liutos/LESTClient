@@ -83,12 +83,24 @@ var app = new Vue({
       }
     ],
     method: 'GET',
+    qs: [
+      {
+        key: '',
+        value: ''
+      }
+    ],
     url: 'http://example.com',
     response: 'Here comes response',
     requestBody: 'Content for test',
     requestStage: '就绪'
   },
   methods: {
+    addQueryString: function () {
+      this.qs.push({
+        key: '',
+        value: ''
+      });
+    },
     addRequestHeader: function () {
       this.requestHeaders.push({
         key: '',
@@ -101,12 +113,7 @@ var app = new Vue({
         body: this.requestBody,
         header: this.requestHeaders,
         method: this.method,
-        qs: [
-          {
-            key: this.queryKey,
-            value: this.queryValue
-          },
-        ],
+        qs: this.qs,
         timeout: this.timeout,
         token,
         url: this.url
