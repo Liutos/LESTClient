@@ -35,6 +35,38 @@
            (user (cl-json:decode-json-from-string response)))
       user)))
 
+(defun pairs-to-kv (pairs)
+  "Converts PAIRS to the form returned by CL-MONGO:KV."
+  (check-type pairs list)
+  (cond ((null pairs)
+         (cl-mongo:kv '()))
+        ((= (length pairs) 1)
+         (let* ((pair (car pairs))
+                (key (cdr (first pair)))
+                (value (cdr (second pair))))
+           (cl-mongo:kv key value)))
+        (t
+         (cl-mongo:kv (pairs-to-kv (list (car pairs)))
+                      (pairs-to-kv (cdr pairs))))))
+
+(defun make-document (body header method qs timeout url)
+  "Returns a document can be insert into MongoDB."
+  (check-type body string)
+  (check-type method keyword)
+  (check-type timeout (or integer null))
+  (check-type url string)
+  (cl-mongo:kv
+   (cl-mongo:kv "body" body)
+   (cl-mongo:kv
+    (cl-mongo:kv "header" (pairs-to-kv header))
+    (cl-mongo:kv
+     (cl-mongo:kv "method" method)
+     (cl-mongo:kv
+      (cl-mongo:kv "qs" (pairs-to-kv qs))
+      (cl-mongo:kv
+       (cl-mongo:kv "timeout" timeout)
+       (cl-mongo:kv "url" url)))))))
+
 (defun make-headers (headers)
   "Converts field names in HEADERS to capital case style."
   (mapcar #'(lambda (header)
