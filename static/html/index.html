@@ -38,7 +38,7 @@
         <option>POST</option>
         <option>PUT</option>
       </select>
-      <input v-model="url" />
+      <input autocomplete="on" type="url" v-model="url" />
       <input type="submit" v-on:click="echoMessage" value="请求" />
     </div>
     <ul>

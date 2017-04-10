@@ -77,7 +77,7 @@
 (defun make-set-cookies (user)
   "Creates a Set-Cookie header for USER."
   (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
-        (max-age (* 1 24 60 60))
+        (max-age (* 7 24 60 60))
         (session-id (uuid:format-as-urn nil (uuid:make-v4-uuid))))
     (red:set session-id id)
     (red:expire session-id max-age)
