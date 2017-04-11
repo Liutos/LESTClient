@@ -52,7 +52,7 @@
 (defun make-document (body header method qs timeout url)
   "Returns a document can be insert into MongoDB."
   (check-type body string)
-  (check-type method keyword)
+  (check-type method string)
   (check-type timeout (or integer null))
   (check-type url string)
   (cl-mongo:kv
@@ -95,6 +95,11 @@
                       (cdr (second pair))))
             filtered)))
 
+(defun save-history (body header method qs timeout url)
+  "Save the current parameters of request into database."
+  (let ((doc (make-document body header method qs timeout url)))
+    (cl-mongo:db.insert "request_history" doc)))
+
 (defun save-user (id user)
   "Save USER owned ID to database."
   (apply #'red:hmset id
@@ -132,6 +137,7 @@
               (next-token (create-token))
               (request-before (eloquent.mvc.prelude:now :millisecond))
               request-after)
+          (save-history body header method qs timeout url)
           (multiple-value-bind (body status-code headers)
               (http-request url
                             :additional-headers (pairs-to-alist header)
