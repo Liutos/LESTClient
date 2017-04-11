@@ -49,7 +49,7 @@
          (cl-mongo:kv (pairs-to-kv (list (car pairs)))
                       (pairs-to-kv (cdr pairs))))))
 
-(defun make-document (body header method qs timeout url)
+(defun make-document (body header method qs timeout url user-id)
   "Returns a document can be insert into MongoDB."
   (check-type body string)
   (check-type method string)
@@ -67,7 +67,9 @@
        (cl-mongo:kv "timeout" timeout)
        (cl-mongo:kv
         (cl-mongo:kv "url" url)
-        (cl-mongo:kv "_id" (uuid)))))))))
+        (cl-mongo:kv
+         (cl-mongo:kv "_id" (uuid))
+         (cl-mongo:kv "user-id" user-id)))))))))
 
 (defun make-headers (headers)
   "Converts field names in HEADERS to capital case style."
@@ -97,9 +99,9 @@
                       (cdr (second pair))))
             filtered)))
 
-(defun save-history (body header method qs timeout url)
+(defun save-history (body header method qs timeout url user-id)
   "Save the current parameters of request into database."
-  (let ((doc (make-document body header method qs timeout url)))
+  (let ((doc (make-document body header method qs timeout url user-id)))
     (cl-mongo:db.insert "request_history" doc)))
 
 (defun save-user (id user)
@@ -143,7 +145,8 @@
               (next-token (create-token))
               (request-before (eloquent.mvc.prelude:now :millisecond))
               request-after)
-          (save-history body header method qs timeout url)
+          (save-history body header method qs timeout url
+                        (eloquent.mvc.request:get-cookie request "user-id"))
           (multiple-value-bind (body status-code headers)
               (http-request url
                             :additional-headers (pairs-to-alist header)
