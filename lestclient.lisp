@@ -4,7 +4,7 @@
 
 (defun create-token ()
   "Creates a token for authorization when requesting /api/request."
-  (let ((token (uuid:format-as-urn nil (uuid:make-v4-uuid))))
+  (let ((token (uuid)))
     (red:set token token)
     (red:expire token (* 24 60 60))
     token))
@@ -65,7 +65,9 @@
       (cl-mongo:kv "qs" (pairs-to-kv qs))
       (cl-mongo:kv
        (cl-mongo:kv "timeout" timeout)
-       (cl-mongo:kv "url" url)))))))
+       (cl-mongo:kv
+        (cl-mongo:kv "url" url)
+        (cl-mongo:kv "_id" (uuid)))))))))
 
 (defun make-headers (headers)
   "Converts field names in HEADERS to capital case style."
@@ -78,7 +80,7 @@
   "Creates a Set-Cookie header for USER."
   (let ((id (eloquent.mvc.prelude:string-assoc "id" user))
         (max-age (* 7 24 60 60))
-        (session-id (uuid:format-as-urn nil (uuid:make-v4-uuid))))
+        (session-id (uuid)))
     (red:set session-id id)
     (red:expire session-id max-age)
     (list :set-cookie (format nil "user-id=~D; Max-Age=~D" id max-age)
@@ -114,6 +116,10 @@
     (if (cl-ppcre:scan "\\d+\\.\\d+\\.\\d+\\.\\d" host)
         host
         (format nil "~A"  (iolib:lookup-hostname host)))))
+
+(defun uuid ()
+  "Generate a uuid in string form."
+  (uuid:format-as-urn nil (uuid:make-v4-uuid)))
 
 ;;; EXPORT
 
