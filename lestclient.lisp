@@ -111,6 +111,11 @@
                                  (list (car pair) (cdr pair)))
                              user)))
 
+(defun start ()
+  "启动应用"
+  (let ((directory (asdf:system-source-directory :lestclient)))
+    (eloquent.mvc.loader:load directory)))
+
 (defun uri-to-ip (uri)
   "Lookup the DNS for resolving the IP address of host in URI."
   (let* ((uri (puri:parse-uri uri))
