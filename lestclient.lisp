@@ -111,11 +111,6 @@
                                  (list (car pair) (cdr pair)))
                              user)))
 
-(defun start ()
-  "启动应用"
-  (let ((directory (asdf:system-source-directory :lestclient)))
-    (eloquent.mvc.loader:load directory)))
-
 (defun uri-to-ip (uri)
   "Lookup the DNS for resolving the IP address of host in URI."
   (let* ((uri (puri:parse-uri uri))
@@ -257,3 +252,18 @@
   (declare (ignorable request))
   (sleep 5)
   (eloquent.mvc.response:respond "OK"))
+
+(defun start ()
+  "启动应用"
+  (let ((db "lestclient")
+        (directory (asdf:system-source-directory :lestclient)))
+    (eloquent.mvc.loader:load directory)
+    (cl-mongo:mongo :db db
+                    :host "localhost"
+                    :port 27017)
+    (cl-mongo:db.use db)))
+
+(defun stop ()
+  "关闭应用"
+  (let ((directory (asdf:system-source-directory :lestclient)))
+    (eloquent.mvc.loader:unload directory)))
