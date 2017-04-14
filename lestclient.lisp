@@ -255,13 +255,17 @@
 
 (defun start ()
   "启动应用"
-  (let ((db "lestclient")
-        (directory (asdf:system-source-directory :lestclient)))
-    (eloquent.mvc.loader:load directory)
-    (cl-mongo:mongo :db db
-                    :host "localhost"
-                    :port 27017)
-    (cl-mongo:db.use db)))
+  (let ((directory (asdf:system-source-directory :lestclient)))
+    (flet ((before-hook (config)
+             (let ((db (eloquent.mvc.config:get config "mongo" "db"))
+                   (host (eloquent.mvc.config:get config "mongo" "host"))
+                   (port (eloquent.mvc.config:get config "mongo" "port")))
+               (cl-mongo:mongo :db db
+                               :host host
+                               :port port)
+               (cl-mongo:db.use db))))
+      (eloquent.mvc.loader:load directory
+                                :before-hook #'before-hook))))
 
 (defun stop ()
   "关闭应用"
