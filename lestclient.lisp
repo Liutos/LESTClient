@@ -134,7 +134,8 @@
        (qs "qs")
        (timeout "timeout" :type :integer)
        (token "token")
-       (url "url" :requirep t))
+       (url "url" :requirep t)
+       (user-agent "user-agent"))
       request
     (when (zerop (red:del token))
       (error 'eloquent.mvc.response:http-compatible-error
@@ -154,7 +155,8 @@
                             :content (if (string= body "") nil body)
                             :external-format-out :utf8
                             :method (eloquent.mvc.prelude:make-keyword method)
-                            :parameters (pairs-to-alist qs))
+                            :parameters (pairs-to-alist qs)
+                            :user-agent user-agent)
             (setf request-after (eloquent.mvc.prelude:now :millisecond))
             (eloquent.mvc.response:respond-json
              `(("data" . (("content" . ,body)
