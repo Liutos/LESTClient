@@ -51,6 +51,7 @@
         <input placeholder="HTTP头部字段名" v-model="header.key" /><input placeholder="HTTP头部字段值" v-model="header.value" /><button @click="addRequestHeader">+</button>
       </li>
     </ul>
+    <input placeholder="User-Agent" type="text" v-model="userAgent" />
     <textarea v-model="requestBody">
     </textarea>
     <input placeholder="超时时间" v-model="timeout" />

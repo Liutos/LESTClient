@@ -92,7 +92,8 @@ var app = new Vue({
     url: 'http://example.com',
     response: 'Here comes response',
     requestBody: 'Content for test',
-    requestStage: '就绪'
+    requestStage: '就绪',
+    userAgent: null
   },
   methods: {
     addQueryString: function () {
@@ -116,7 +117,8 @@ var app = new Vue({
         qs: this.qs,
         timeout: this.timeout,
         token,
-        url: this.url
+        url: this.url,
+        'user-agent': this.userAgent
       }, {
         'Content-Type': 'application/json'
       }).then(response => {
