@@ -6,13 +6,24 @@ Simulation of RESTClient that is a Firefox plugin for HTTP requests
 
 ## Startup
 
-* Open the Emacs editor
-* Open the lestclient.asd in Emacs
-* M-x and enter command slime
-* Run the following Common Lisp Code
+* Run a MongoDB listen on port 27017
+* Run a Redis listen on port 8631
+* Install by running the following command
 
-        (asdf:load-system 'lestclient)
-        (in-package :lestclient)
-        (lest-start)
+```sh
+ros install Liutos/LESTClient
+```
 
-Now, you can open your web browser and access 'http://localhost:4242'
+* In the REPL, load this project by entering the following code
+
+```lisp
+(ql:quickload 'lestclient)
+```
+
+* Start this application by the following code
+
+```lisp
+(lestclient:start)
+```
+
+Now, you can open your web browser and access 'http://localhost:8087
