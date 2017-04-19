@@ -272,4 +272,7 @@
 (defun stop ()
   "关闭应用"
   (let ((directory (asdf:system-source-directory :lestclient)))
-    (eloquent.mvc.loader:unload directory)))
+    (flet ((before-hook ()
+             (format t "Goodbye~%")))
+      (eloquent.mvc.loader:unload directory
+                                  :before-hook #'before-hook))))
