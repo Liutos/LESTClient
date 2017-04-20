@@ -85,8 +85,8 @@
         (session-id (uuid)))
     (red:set session-id id)
     (red:expire session-id max-age)
-    (list :set-cookie (format nil "user-id=~D; Max-Age=~D" id max-age)
-          :set-cookie (format nil "session-id=~A; Max-Age=~D" session-id max-age))))
+    (list :set-cookie (format nil "user-id=~D; Max-Age=~D; HttpOnly" id max-age)
+          :set-cookie (format nil "session-id=~A; Max-Age=~D; HttpOnly" session-id max-age))))
 
 (defun pairs-to-alist (pairs)
   "Converts PAIRS to the form required by :ADDITIONAL-HEADERS and :PARAMETERS in HTTP-REQUEST"
