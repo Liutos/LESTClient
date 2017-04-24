@@ -177,6 +177,7 @@
     ;; Check the Cookie HTTP header
     (when (and (string/= path-info "/")
                (string/= path-info "/api/client_id")
+               (string/= path-info "/middlewares")
                (string/= path-info "/sign_in"))
       (let ((session-id (eloquent.mvc.request:get-cookie request "session-id"))
             (user-id (eloquent.mvc.request:get-cookie request "user-id")))
@@ -230,6 +231,13 @@
          (root (eloquent.mvc.config:get-application-root config))
          (home-page (merge-pathnames "static/html/index.html" root)))
     (eloquent.mvc.response:respond home-page)))
+
+(defun show-middlewares ()
+  "展示应用所启用的中间件"
+  (let ((cl-json:*lisp-identifier-name-to-json* 'identity)
+        (middlewares eloquent.mvc.middleware:*middlewares*))
+    (eloquent.mvc.response:respond-json
+     middlewares)))
 
 (defun sign-in (request)
   (eloquent.mvc.controller:query-string-bind ((code "code"))
