@@ -34,49 +34,55 @@
         </div>
       </div><!-- /.container-fluid -->
     </nav>
-    <div class="well well-sm">
-      <select v-model="method">
-        <option>DELETE</option>
-        <option>GET</option>
-        <option>POST</option>
-        <option>PUT</option>
-      </select>
-      <input autocomplete="on" type="url" v-model="url" />
-      <input type="submit" v-on:click="echoMessage" value="请求" />
-    </div>
-    <ul>
-      <li v-for="query in qs">
-        <input placeholder="query string参数名" v-model="query.key" /><input placeholder="query string参数值" v-model="query.value" /><button @click="addQueryString">+</button>
-      </li>
-    </ul>
-    <ul>
-      <li v-for="header in requestHeaders">
-        <input placeholder="HTTP头部字段名" v-model="header.key" /><input placeholder="HTTP头部字段值" v-model="header.value" /><button @click="addRequestHeader">+</button>
-      </li>
-    </ul>
-    <input placeholder="User-Agent" type="text" v-model="userAgent" />
-    <textarea v-model="requestBody">
-    </textarea>
-    <input placeholder="超时时间" v-model="timeout" />
-    <span>{{ requestStage }}</span>
-    <div class="panel panel-default">
-      <div class="panel-heading">杂项</div>
-      <table class="table">
-        <tr><td>状态码</td><td>{{ status_code }}</td></tr>
-        <tr><td>总耗时</td><td>{{ total_time }}</td></tr>
-        <tr><td>IP地址</td><td>{{ ip_address }}</td></tr>
-      </table>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">接口响应头部</div>
-      <table class="table">
-        <tr v-for="header in headers">
-          <td>{{ header.field }}</td><td>{{ header.value }}</td>
-        </tr>
-      </table>
-    </div>
-    <div>
-      <pre>{{ response }}</pre>
+    <div class="row">
+      <div class="col-md-5">
+        <div class="well well-sm">
+          <select v-model="method">
+            <option>DELETE</option>
+            <option>GET</option>
+            <option>POST</option>
+            <option>PUT</option>
+          </select>
+          <input autocomplete="on" type="url" v-model="url" />
+          <input type="submit" v-on:click="echoMessage" value="请求" />
+        </div>
+        <ul>
+          <li v-for="query in qs">
+            <input placeholder="query string参数名" v-model="query.key" /><input placeholder="query string参数值" v-model="query.value" /><button @click="addQueryString">+</button>
+          </li>
+        </ul>
+        <ul>
+          <li v-for="header in requestHeaders">
+            <input placeholder="HTTP头部字段名" v-model="header.key" /><input placeholder="HTTP头部字段值" v-model="header.value" /><button @click="addRequestHeader">+</button>
+          </li>
+        </ul>
+        <input placeholder="User-Agent" type="text" v-model="userAgent" />
+        <textarea v-model="requestBody">
+        </textarea>
+        <input placeholder="超时时间" v-model="timeout" />
+        <span>{{ requestStage }}</span>
+      </div>
+      <div class="col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">杂项</div>
+          <table class="table">
+            <tr><td>状态码</td><td>{{ status_code }}</td></tr>
+            <tr><td>总耗时</td><td>{{ total_time }}</td></tr>
+            <tr><td>IP地址</td><td>{{ ip_address }}</td></tr>
+          </table>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">接口响应头部</div>
+          <table class="table">
+            <tr v-for="header in headers">
+              <td>{{ header.field }}</td><td>{{ header.value }}</td>
+            </tr>
+          </table>
+        </div>
+        <div>
+          <pre>{{ response }}</pre>
+        </div>
+      </div>
     </div>
   </div>
   <script src="/static/js/app.js"></script>
