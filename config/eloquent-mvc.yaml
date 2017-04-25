@@ -18,3 +18,5 @@ server:
   server: hunchentoot
 static-file:
   prefix: /static/
+template:
+  directory: <% @var user-homedir-pathname %>src/cl/LESTClient/static/html/

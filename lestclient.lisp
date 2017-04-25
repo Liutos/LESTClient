@@ -261,8 +261,7 @@
   "登出"
   (let ((session-id (eloquent.mvc.request:get-cookie request "session-id")))
     (red:del session-id)
-    (eloquent.mvc.response:respond
-     "")))
+    '()))
 
 (defun sleepy (request)
   "5秒后再响应"
