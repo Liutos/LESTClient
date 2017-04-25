@@ -257,6 +257,13 @@
                     ,@set-cookies)
          :status 302)))))
 
+(defun sign-out (request)
+  "登出"
+  (let ((session-id (eloquent.mvc.request:get-cookie request "session-id")))
+    (red:del session-id)
+    (eloquent.mvc.response:respond
+     "")))
+
 (defun sleepy (request)
   "5秒后再响应"
   (declare (ignorable request))
