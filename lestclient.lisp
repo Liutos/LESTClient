@@ -9,6 +9,19 @@
     (red:expire token (* 24 60 60))
     token))
 
+(defun document-to-alist (doc)
+  "Convert a DOC of type CL-MONGO:DOCUMENT to a equivalent, serializable alist."
+  (check-type doc cl-mongo:document)
+  (labels ((aux (doc)
+             (cond ((typep doc 'cl-mongo:document)
+                    (let ((keys (cl-mongo:get-keys doc)))
+                      (mapcar #'(lambda (key)
+                                  (cons key
+                                        (aux (cl-mongo:get-element key doc))))
+                              keys)))
+                   (t doc))))
+    (aux doc)))
+
 (defun fetch-access-token (client-id client-secret code)
   "Fetch access token for GitHub account by CODE."
   (check-type code string)
