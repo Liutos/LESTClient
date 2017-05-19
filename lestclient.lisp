@@ -20,7 +20,8 @@
                                         (aux (cl-mongo:get-element key doc))))
                               keys)))
                    (t doc))))
-    (aux doc)))
+    (let ((id (cl-mongo:doc-id doc)))
+      (append (aux doc) (list (cons "_id" id))))))
 
 (defun fetch-access-token (client-id client-secret code)
   "Fetch access token for GitHub account by CODE."
