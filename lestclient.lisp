@@ -246,6 +246,20 @@
          (home-page (merge-pathnames "static/html/index.html" root)))
     (eloquent.mvc.response:respond home-page)))
 
+(defun request-history (request)
+  "获取当前用户的请求历史"
+  (let ((user-id (eloquent.mvc.request:get-cookie request "user-id")))
+    (eloquent.mvc.controller:query-string-bind ((limit "limit" :default 10)
+                                                (offset "offset" :default 0))
+        request
+      (let* ((result (cl-mongo:db.find "request_history"
+                                       (cl-mongo:kv "user-id" user-id)
+                                       :limit limit
+                                       :skip offset))
+             (docs (cadr result)))
+        (eloquent.mvc.response:respond-json
+         (mapcar #'document-to-alist docs))))))
+
 (defun show-middlewares ()
   "展示应用所启用的中间件"
   (let ((cl-json:*lisp-identifier-name-to-json* 'identity)
