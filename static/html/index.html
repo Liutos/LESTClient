@@ -61,6 +61,14 @@
         </textarea>
         <input placeholder="超时时间" v-model="timeout" />
         <span>{{ requestStage }}</span>
+        <div>
+          <span>历史记录</span>
+          <ul>
+            <li v-for="request in requestHistory">
+              <span>{{ request.url }}</span>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="col-md-6">
         <div class="panel panel-default">

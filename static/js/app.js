@@ -92,6 +92,11 @@ var app = new Vue({
     url: 'http://example.com',
     response: 'Here comes response',
     requestBody: 'Content for test',
+    requestHistory: [
+      {
+        url: 'http://example.com'
+      }
+    ],
     requestStage: '就绪',
     userAgent: null
   },
