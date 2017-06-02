@@ -146,6 +146,13 @@ var app = new Vue({
         this.response = response.statusText;
         this.requestStage = '失败';
       });
+    },
+    fetchRequestHistory: function () {
+      Vue.http.get('/api/requests', {}, {})
+        .then(response => {
+          const body = response.body;
+          this.requestHistory = body;
+        });
     }
   }
 });
