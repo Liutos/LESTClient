@@ -63,7 +63,7 @@
          (cl-mongo:kv (pairs-to-kv (list (car pairs)))
                       (pairs-to-kv (cdr pairs))))))
 
-(defun make-document (body header method qs timeout url user-id)
+(defun make-document (body create-at header method qs timeout url user-id)
   "Returns a document can be insert into MongoDB."
   (check-type body string)
   (check-type method string)
@@ -83,7 +83,9 @@
         (cl-mongo:kv "url" url)
         (cl-mongo:kv
          (cl-mongo:kv "_id" (uuid))
-         (cl-mongo:kv "user-id" user-id)))))))))
+         (cl-mongo:kv
+          (cl-mongo:kv "user-id" user-id)
+          (cl-mongo:kv "create-at" create-at))))))))))
 
 (defun make-headers (headers)
   "Converts field names in HEADERS to capital case style."
@@ -115,7 +117,8 @@
 
 (defun save-history (body header method qs timeout url user-id)
   "Save the current parameters of request into database."
-  (let ((doc (make-document body header method qs timeout url user-id)))
+  (let* ((now (eloquent.mvc.prelude:now :millisecond))
+         (doc (make-document body now header method qs timeout url user-id)))
     (cl-mongo:db.insert "request_history" doc)))
 
 (defun save-user (id user)
@@ -249,8 +252,12 @@
 (defun request-history (request)
   "获取当前用户的请求历史"
   (let ((user-id (eloquent.mvc.request:get-cookie request "user-id")))
-    (eloquent.mvc.controller:query-string-bind ((limit "limit" :default 10)
-                                                (offset "offset" :default 0))
+    (eloquent.mvc.controller:query-string-bind ((limit "limit"
+                                                       :default 10
+                                                       :type :integer)
+                                                (offset "offset"
+                                                        :default 0
+                                                        :type :integer))
         request
       (let* ((result (cl-mongo:db.find "request_history"
                                        (cl-mongo:kv "user-id" user-id)
