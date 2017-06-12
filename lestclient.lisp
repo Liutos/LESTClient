@@ -260,7 +260,9 @@
                                                         :type :integer))
         request
       (let* ((result (cl-mongo:db.find "request_history"
-                                       (cl-mongo:kv "user-id" user-id)
+                                       (cl-mongo:kv
+                                        (cl-mongo:kv "query" (cl-mongo:kv "user-id" user-id))
+                                        (cl-mongo:kv "orderby" (cl-mongo:kv "create-at" -1)))
                                        :limit limit
                                        :skip offset))
              (docs (cadr result)))
