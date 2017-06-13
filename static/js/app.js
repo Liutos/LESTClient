@@ -127,8 +127,15 @@ var app = new Vue({
         const data = body.data;
         const success = body.success;
         if (success) {
-          this.response = data.content;
           this.headers = data.headers;
+          const content_type = data.headers.find((header) => {
+            return header.field === 'Content-Type';
+          });
+          if (content_type && content_type.value.includes('application/json')) {
+            this.response = JSON.stringify(JSON.parse(data.content), null, 2);
+          } else {
+            this.response = data.content;
+          }
           this.status_code = data['status-code'];
           token = data.token;
           this.ip_address = data['ip-address'];
