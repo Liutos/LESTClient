@@ -78,8 +78,8 @@ var app = new Vue({
   data: {
     requestHeaders: [
       {
-        key: '',
-        value: ''
+        key: 'Content-Type',
+        value: 'application/json'
       }
     ],
     method: 'GET',
