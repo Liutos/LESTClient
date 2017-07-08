@@ -9,7 +9,7 @@
                #:cl-redis
                #:drakma
                #:eloquent-mvc
-               ;; #:iolib
+               #:iolib
                #:puri
                #:uuid)
   :serial t

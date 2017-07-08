@@ -134,8 +134,7 @@
          (host (puri:uri-host uri)))
     (if (cl-ppcre:scan "\\d+\\.\\d+\\.\\d+\\.\\d" host)
         host
-        (format nil "~A"  ;; (iolib:lookup-hostname host)
-                "unknown"))))
+        (format nil "~A"  (iolib:lookup-hostname host)))))
 
 (defun uuid ()
   "Generate a uuid in string form."
